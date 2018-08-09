@@ -1,0 +1,21 @@
+# phpstorm project files
+.idea/**
+
+# OS cache
+Thumbs.db
+.DS_Store
+
+# composer vendor dir
+vendor/**
+
+# Uploads dir
+//web/media
+
+# Yii temp directories
+//web/assets/**
+//runtime/**
+//web/minify/**
+
+# composer itself is not needed
+composer.lock
+
