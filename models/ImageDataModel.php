@@ -90,8 +90,10 @@ class ImageDataModel extends  ServerModel  {
             return false;
         }
         if( $httpcode == 200 ){
-            return str_replace('"','',$response);
-
+            $data = json_decode($response, true);
+            if( isset( $data['id'] ) ){
+                return $data['id'];
+            }
         }
 
         return false;

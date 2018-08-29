@@ -33,23 +33,25 @@ $(function () {
 
 
 
-    $('body').on('click', '.view-event-data', function(){
+    $('body').on('click', '.view-point-data', function(){
 
-        let eventId = $(this).data('event');
-        let userId = $(this).data('user');
+        let pointId = $(this).data('point');
+        let userToken = $(this).data('token');
+        let pointType = $(this).data('type');
 
         $('#view-event .modal-content').html('Loading...');
 
 
         $.ajax({
-            url: '/site/view_event_item/',
+            url: '/point/view-item/',
             type: 'POST',
             data: {
-                user_id: userId,
-                event_id: eventId,
+                owner_user_token: userToken,
+                point_id: pointId,
+                point_type: pointType,
             },
             success: function(res){
-                //console.log(res);
+                console.log(res);
                 if( res ){
                     $('#view-event .modal-content').html(res);
                 }
@@ -63,11 +65,10 @@ $(function () {
 
 
 
-    function loadProfile( userId, userToken ){
+    function loadProfile( userId, userToken, userPhone ){
 
         $('.success-form').hide();
         $('.error-form').hide();
-
 
         $.ajax({
             url: '/user/view/',
@@ -75,6 +76,7 @@ $(function () {
             data: {
                 user_id: userId,
                 user_token: userToken,
+                user_phone: userPhone,
             },
             success: function(res){
                 //console.log(res);
@@ -82,7 +84,8 @@ $(function () {
                     $('#edit-user-profile .modal-content').html(res);
                     $('#edit-user-profile').modal('show');
 
-
+                }else{
+                    alert('Error! Try more');
                 }
 
             },
@@ -99,15 +102,18 @@ $(function () {
 
         let userId = $(this).data('id');
         let userToken = $(this).data('token');
+        let userPhone = $(this).data('phone');
 
         $('#edit-user-profile .modal-content').html('Loading...');
 
-        loadProfile(userId, userToken);
+        loadProfile(userId, userToken, userPhone);
 
     })
 
 
-
+    $('.pjax-container').on('pjax:end',   function() {
+        $('.new-user.edit-user-profile').trigger('click');
+    });
 
 
 
@@ -115,7 +121,7 @@ $(function () {
 
         $('.success-form').hide();
         $('.error-form').hide();
-
+        console.log('ADD USER!');
         $('.window-description').html('Creating user, wait please...');
 
         $.ajax({

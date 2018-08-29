@@ -72,6 +72,8 @@ class UserDataModel extends  ServerModel {
         $new_phone_number =  $this->generatePhoneNumber( count($usersArray['data']) );
 
 
+
+
         if( $oldPhoneNumber ){
             $new_phone_number = $oldPhoneNumber;
         }
@@ -79,15 +81,20 @@ class UserDataModel extends  ServerModel {
             $sms_code = $this->getSmsCode($new_phone_number);
 
 
+
+
             if( $sms_code ){
 
                 $token = $this->getUserToken($new_phone_number, $sms_code );
+
+
 
                 if( $token ){
 
                     $profile_id =  $this->createUserProfile($token);
 
                     if( isset( $profile_id ) and !empty($profile_id) ){
+                        $profile_id['token'] = $token;
                         return $profile_id;
                     }
 
@@ -162,10 +169,10 @@ class UserDataModel extends  ServerModel {
         }
 
         $data = array(
-            'fullName' => '',
-            'nickname' => '',
-            'locale' => '',
-            'city' => '',
+            'fullName' => 'Draft',
+            //'nickname' => '',
+            'locale' => 'RU',
+            'city' => 'Kiev',
         );
         $data = json_encode($data);
 

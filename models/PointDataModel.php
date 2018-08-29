@@ -31,6 +31,8 @@ class PointDataModel extends  ServerModel {
 
                     $last_visit = str_replace(' ','T',$data['lastVisit']);
 
+
+
                     $new_data = array(
                         'latitude' =>  $data['lat'],
                         'longitude' =>  $data['lng'],
@@ -39,8 +41,8 @@ class PointDataModel extends  ServerModel {
 
 
                     // TODO remove when fix bug with type
-                    $new_data['ownerId'] =  $data['id'];
-                    $new_data['type'] =  $data['type'];
+                    //$new_data['ownerId'] =  $data['id'];
+                    //$new_data['type'] =  $data['type'];
 
                     // End
 
@@ -61,7 +63,8 @@ class PointDataModel extends  ServerModel {
 
                 ){
 
-                    $end_point = 'washere';
+                    $end_point = 'was-here';
+
                     //$images = array( substr( $data['images'], 0, -1) );
 
                     $images = array_filter( explode(',', $data['images']) );
@@ -75,9 +78,11 @@ class PointDataModel extends  ServerModel {
                         ),
                     );
 
-                    // TODO remove when fix bug with type
-                    $new_data['ownerId'] =  $data['id'];
-                    $new_data['type'] =  $data['type'];
+
+
+                    // DONE remove when fix bug with type
+                    //$new_data['ownerId'] =  $data['id'];
+                    //$new_data['type'] =  $data['type'];
                     // End
 
                     $new_data = json_encode($new_data);
@@ -101,13 +106,14 @@ class PointDataModel extends  ServerModel {
 
                 ){
 
-                    $end_point = 'willbehere';
+                    $end_point = 'will-be-here';
 
                     $startTime = str_replace(' ','T',$data['startTime']);
                     $finishTime = str_replace(' ','T',$data['finishTime']);
 
                     //$images = '[' . substr( $data['images'], 0, -1) . ']';
                     $images = array_filter( explode(',', $data['images']) );
+
 
                     $new_data = array(
                         'latitude' =>  $data['lat'],
@@ -120,9 +126,10 @@ class PointDataModel extends  ServerModel {
                         ),
                     );
 
-                    // TODO remove when fix bug with type
-                    $new_data['ownerId'] =  $data['id'];
-                    $new_data['type'] =  $data['type'];
+
+                    // DONE remove when fix bug with type
+                    //$new_data['ownerId'] =  $data['id'];
+                    //$new_data['type'] =  $data['type'];
                     // End
 
                     $new_data = json_encode($new_data);
@@ -136,8 +143,6 @@ class PointDataModel extends  ServerModel {
         if( $new_data and $end_point){
 
 
-            //return $new_data . ' END P:' . $end_point . ' TOKEN: ' . $token;
-
 
             $return_data = $this->curlRequest(
                 $this->SERVER_PUBLIC_ADRESS,
@@ -146,6 +151,7 @@ class PointDataModel extends  ServerModel {
                 'POST',
                 $new_data
             );
+
 
             if( is_array($return_data) and $return_data['status'] === true ){
                 return  $return_data['data'];
@@ -189,47 +195,41 @@ class PointDataModel extends  ServerModel {
 
     }
 
-    public function getEvent( $event_id , $token ){
 
-        if( !$event_id and !$token ){
+    // Get point data by id. @type set endpoint
+    public function getPointById( $id , $token , $type ){
+
+        if( !$id and !$token){
             return false;
         }
 
-        $curl = curl_init();
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            '/geo-point/' . strtolower($type) . '/' . $id,
+            $token
+        );
 
-        curl_setopt_array($curl, array(
-
-            CURLOPT_URL => $this->http_address . "/geo-point/" . $event_id,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => array(
-                "Cache-Control: no-cache",
-                "X-Auth-Token:" . $token
-            ),
-        ));
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-
-        curl_close($curl);
-
-        if ($err) {
-            //echo "cURL Error #:" . $err;
-            return false;
-        } else {
-            //echo $response;
-            return $response;
-        }
+        return $return_data;
 
 
     }
 
-    public function getAllEvents( $token ){
+    public function getPoints(  ){
 
-        if( !$token){
-            return false;
+
+        $return_data = $this->curlRequest( $this->SERVER_PROTECTED_ADRESS,"/geo-point" );
+
+        if( is_array($return_data) and $return_data['status'] === true ){
+            $return_data['data'] = json_decode($return_data['data'], TRUE);
         }
 
+        return $return_data;
+
+
+        /*if( !$token){
+            return false;
+        }*/
+/*
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -254,7 +254,7 @@ class PointDataModel extends  ServerModel {
         } else {
             //echo $response;
             return $response;
-        }
+        }*/
 
 
     }

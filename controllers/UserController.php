@@ -106,16 +106,23 @@ class UserController extends MainController
 
             $data = Yii::$app->request->post();
 
-
             if( isset( $data['user_id'] ) and !empty( $data['user_id'] )   and
-                isset( $data['user_token'] ) and !empty( $data['user_token'] ) ){
+                isset( $data['user_token'] ) and !empty( $data['user_token'] ) and
+                isset( $data['user_phone'] ) and !empty( $data['user_phone'] )
+                                                                                ){
 
                 $UserDataModel = new UserDataModel();
 
 
+                // If user account did not confirmed with sms code  - then confirm it with create profile
+                if( strstr($data['user_token'], 'null') ){
+                    $updateUser = $UserDataModel->addNewUser($data['user_phone']);
+                    if( $updateUser ){
+                        $data['user_token'] = $updateUser["token"];
+                    }
+                }
+
                 $user_data = $UserDataModel->getUserProfile( $data['user_id'], $data['user_token'] );
-
-
 
 
                 if( $user_data['status'] === true){

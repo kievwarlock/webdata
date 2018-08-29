@@ -141,7 +141,7 @@ class UserModel extends  Model {
 
                 ){
 
-                    $end_point = 'washere';
+                    $end_point = 'was-here';
                     //$images = array( substr( $data['images'], 0, -1) );
                     $images = array_filter( explode(',', $data['images']) );
 
@@ -174,7 +174,7 @@ class UserModel extends  Model {
 
                 ){
 
-                    $end_point = 'willbehere';
+                    $end_point = 'will-be-here';
 
                     $startTime = str_replace(' ','T',$data['startTime']);
                     $finishTime = str_replace(' ','T',$data['finishTime']);

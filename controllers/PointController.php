@@ -47,6 +47,114 @@ class PointController extends MainController
     }
 
 
+    public function actionViewItem()
+    {
+        if (Yii::$app->request->isAjax) {
+
+            $data = Yii::$app->request->post();
+
+            if(
+                isset($data['owner_user_token']) and !empty($data['owner_user_token']) and
+                isset($data['point_id']) and !empty($data['point_id'])  and
+                isset($data['point_type']) and !empty($data['point_type'])
+            ){
+
+                $pointModel = new PointDataModel();
+                $pointData = $pointModel->getPointById( $data['point_id'], $data['owner_user_token'], str_replace('_','-',$data['point_type']) );
+
+                if( $pointData["status"] === true ){
+                    //return var_dump( json_decode($pointData["data"], true ) );
+
+                    return $this->renderAjax('modal/point',[
+                        'point_data' => json_decode($pointData["data"]),
+                        //'user_phone' => $user_phone,
+                        //'images' => $images,
+                    ]);
+                }
+
+
+
+            }
+
+        }
+
+        return false;
+
+    }
+
+    public function actionView()
+    {
+
+        $pointModel = new PointDataModel();
+        $allGeoPoints = $pointModel->getPoints();
+
+        $userDataModel = new UserDataModel();
+        $usersArray = $userDataModel->getUsersArray();
+
+        if( $allGeoPoints['status']  === true  and $usersArray['status'] === true ){
+             return $this->render('view',[
+                'points' => $allGeoPoints['data'],
+                'users' => $usersArray['data'],
+               //'images' => $images,
+
+              // 'current_user_id' => $current_user,
+           ]);
+        }
+
+
+       /* $post_id = Yii::$app->getRequest()->getQueryParam('id');
+        if( $post_id ){
+            $current_user = $post_id;
+        }else{
+            $current_user = false;
+        }
+        $token = Datausers::find()
+            ->select('token')
+            ->asArray()
+            ->where(['not',['token'=>null]])
+            ->one();
+
+        $users = Datausers::find()
+            ->select('profile_id, phone')
+            ->asArray()
+            ->all();
+
+
+        $images = false;
+        $all_events = false;*/
+
+        /*if( $token["token"] ){
+            $UserDataModel = new UserModel();
+            $all_events = $UserDataModel->getAllEvents( $token["token"] );
+
+            $image_data = $UserDataModel->getImage(5, $token['token'] );
+            if( $image_data ){
+                $images[] = $image_data;
+            }
+            if( $all_events ){
+                $all_events = json_decode($all_events, true);
+            }
+        }*/
+
+       /* return $this->render('event_list',[
+            'events' => $all_events,
+            //'images' => $images,
+           // 'users' => $users,
+           // 'current_user_id' => $current_user,
+        ]);*/
+
+        /*$user_id = Yii::$app->getRequest()->getQueryParam('id');
+        $userDataModel = new UserDataModel();
+        $usersArray = $userDataModel->getUsersArray();
+
+        return $this->render('view',[
+            'current_user_id' => $user_id,
+            'all_users' => $usersArray,
+        ]);*/
+
+
+    }
+
 
     public function actionIndex()
     {
@@ -54,29 +162,13 @@ class PointController extends MainController
         $user_id = Yii::$app->getRequest()->getQueryParam('id');
         $userDataModel = new UserDataModel();
         $usersArray = $userDataModel->getUsersArray();
-
-        return $this->render('view',[
-            'current_user_id' => $user_id,
-            'all_users' => $usersArray,
-        ]);
-
-
-    }
-
-
-    public function actionView()
-    {
-
-        $user_id = Yii::$app->getRequest()->getQueryParam('id');
-        $userDataModel = new UserDataModel();
-        $usersArray = $userDataModel->getUsersArray();
         if( $usersArray['status'] === true ){
-            return $this->render('view',[
+            return $this->render('index',[
                 'current_user_id' => $user_id,
                 'all_users' => $usersArray['data'],
             ]);
         }else{
-            return $this->render('view',[
+            return $this->render('index',[
                 'current_user_id' => '',
                 'all_users' => '',
                 'error' => $usersArray['error']

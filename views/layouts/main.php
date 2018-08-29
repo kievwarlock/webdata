@@ -14,7 +14,7 @@ use app\assets\AppAsset;
 use yii\widgets\Menu;
 
 
-if( $this->context->module->requestedRoute ==  'point/view' ){
+if( $this->context->module->requestedRoute ==  'point/index' ){
     AppMapAsset::register($this);
 }else{
     AppAsset::register($this);
@@ -115,16 +115,17 @@ if( $this->context->module->requestedRoute ==  'point/view' ){
                             ],
                             [
                                 'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Create point</span>',
+                                'url' => ['point/index'],
+                            ],
+                            [
+                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Event list</span>',
                                 'url' => ['point/view'],
                             ],
                             [
                                 'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Add event</span>',
                                 'url' => ['site/event_add'],
                             ],
-                            [
-                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Event list</span>',
-                                'url' => ['site/event_list'],
-                            ],
+
                             /*[
                                 'label' => '<span class="glyphicon glyphicon-upload" aria-hidden="true"></span><span>Images upload</span>',
                                 'url' => ['site/images'],

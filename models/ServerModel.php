@@ -83,7 +83,7 @@ class ServerModel  {
             $return['data'] = $response;
         }else{
             $return['status'] = false;
-            $return['error'] = $error . ' CODE: ' . $return['http_code'];
+            $return['error'] = 'Res:'. $response . ' | ' . $error . ' | CODE: ' . $return['http_code'];
         }
 
         return $return;
