@@ -529,6 +529,47 @@ const DEFAULT_MAP_ZOOM = 8;
 const DEFAULT_MAP_MIN_ZOOM = 1;
 const DEFAULT_MAP_MAX_ZOOM = 20;
 
+
+function initMap( lat, lng ){
+
+
+    if( document.getElementById( MAP_CONTAINER ) ) {
+
+
+
+        mapboxgl.accessToken = ACCESS_TOKEN;
+        var map = new mapboxgl.Map({
+            container: MAP_CONTAINER,
+            style: MAP_STYLE,
+            center: INIT_MAP_CENTER,
+            zoom: DEFAULT_MAP_ZOOM,
+            minZoom:DEFAULT_MAP_MIN_ZOOM,
+            maxZoom:DEFAULT_MAP_MAX_ZOOM,
+        });
+
+
+        map.on('load', function() {
+
+            var initMarker = new Marker(map, 'point');
+            initMarker.addMarker('', lat, lng);
+
+
+            map.on('click', function (e) {
+
+                let currentCoordinates = initMarker.addMarker(e);
+                $('#geo-point-latitude').val(currentCoordinates.coordinates.lat);
+                $('#geo-point-longitude').val(currentCoordinates.coordinates.lng);
+
+            });
+
+        });
+
+
+
+    }
+
+}
+
 if( document.getElementById( MAP_CONTAINER ) ) {
 
 

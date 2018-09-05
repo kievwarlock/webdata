@@ -14,6 +14,8 @@ class PointDataModel extends  ServerModel {
             return false;
         }
 
+
+
         $new_data = false;
         $end_point = false;
 
@@ -59,8 +61,8 @@ class PointDataModel extends  ServerModel {
                     isset( $data['lat'] ) and !empty( $data['lng'] ) and
                     isset( $data['lat'] ) and !empty( $data['lng'] ) and
                     isset( $data['images'] ) and !empty( $data['images'] ) and
-                    isset( $data['description'] ) and !empty( $data['description'] )
-
+                    isset( $data['description'] ) and !empty( $data['description'] ) and
+                    isset( $data['tags'] ) and !empty( $data['tags'] )
                 ){
 
                     $end_point = 'was-here';
@@ -75,6 +77,7 @@ class PointDataModel extends  ServerModel {
                         'contentCard' => array(
                             'imageIds' => $images,
                             'text'   => $data['description'],
+                            'topicIds' => $data['tags'],
                         ),
                     );
 
@@ -102,7 +105,8 @@ class PointDataModel extends  ServerModel {
                     isset( $data['startTime'] ) and !empty( $data['startTime'] ) and
                     isset( $data['finishTime'] ) and !empty( $data['finishTime'] ) and
                     isset( $data['images'] ) and !empty( $data['images'] ) and
-                    isset( $data['description'] ) and !empty( $data['description'] )
+                    isset( $data['description'] ) and !empty( $data['description'] ) and
+                    isset( $data['tags'] ) and !empty( $data['tags'] )
 
                 ){
 
@@ -123,6 +127,7 @@ class PointDataModel extends  ServerModel {
                         'contentCard' => array(
                             'imageIds' => $images,
                             'text'   => $data['description'],
+                            'topicIds' => $data['tags'],
                         ),
                     );
 
@@ -194,6 +199,213 @@ class PointDataModel extends  ServerModel {
         return false;
 
     }
+
+
+
+    private function updateContentCard( string $idCard, string $token, array $data ){
+
+        if( !$token or !$data or !$idCard ){
+            return $return = array(
+                'status' => false,
+                'error' => 'No data !',
+            );
+        }
+
+        $update_data = json_encode($data);
+
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            "/content-card/" . $idCard ,
+            $token,
+            'PUT',
+            $update_data
+        );
+
+        return  $return_data;
+
+    }
+
+    public function updatePoint(  $id, $data, $token ){
+
+        if( !$token or !$data or !$id ){
+            return $return = array(
+                'status' => false,
+                'error' => 'No data or token or id',
+            );
+        }
+
+        $return_update = array(
+            'point' => false,
+            'content' => false,
+        );
+
+        $new_data = false;
+        $end_point = false;
+
+        switch($data['type']){
+
+            case 'PROFILE':
+
+                if(
+                    isset( $data['lat'] ) and !empty( $data['lat'] ) and
+                    isset( $data['lng'] ) and !empty( $data['lng'] ) and
+                    isset( $data['lastVisit'] ) and !empty( $data['lastVisit'] )
+                ){
+
+                    $end_point = 'profile';
+
+                    $return_update['content'] = array(
+                        'status' => true,
+                        'data' => '',
+                    );
+
+
+                    $new_data = array(
+                        'latitude' =>  $data['lat'],
+                        'longitude' =>  $data['lng'],
+                        'lastVisit' => $data['lastVisit'],
+                    );
+
+                    $new_data = json_encode($new_data);
+
+                }
+
+                break;
+
+            case 'WAS_HERE':
+
+                if(
+                    isset( $data['lat'] ) and !empty( $data['lat'] ) and
+                    isset( $data['lng'] ) and !empty( $data['lng'] ) and
+                    isset( $data['imageIds'] ) and !empty( $data['imageIds'] ) and
+                    isset( $data['description'] ) and !empty( $data['description'] ) and
+                    isset( $data['tags'] ) and !empty( $data['tags'] )
+                ){
+
+                    $end_point = 'was-here';
+
+
+                    if( is_array( $data['imageIds'] ) and count( $data['imageIds'] ) > 0 ){
+                        $imagesId = $data['imageIds'];
+                    }else{
+                        $imagesId = array();
+                    }
+
+
+                    $new_data = array(
+                        'latitude' =>  $data['lat'],
+                        'longitude' =>  $data['lng'],
+                    );
+
+                    $contentCard = array(
+                        'imageIds' => $imagesId,
+                        'text'   => $data['description'],
+                        'topicIds' => $data['tags'],
+                    );
+
+
+                    $new_data = json_encode($new_data);
+
+                }
+
+
+                break;
+
+            case 'WILL_BE_HERE':
+
+
+                if(
+                    isset( $data['lat'] ) and !empty( $data['lat'] ) and
+                    isset( $data['lng'] ) and !empty( $data['lng'] ) and
+                    isset( $data['startTime'] ) and !empty( $data['startTime'] ) and
+                    isset( $data['finishTime'] ) and !empty( $data['finishTime'] ) and
+                    isset( $data['imageIds'] ) and !empty( $data['imageIds'] ) and
+                    isset( $data['description'] ) and !empty( $data['description'] ) and
+                    isset( $data['tags'] ) and !empty( $data['tags'] )
+
+                ){
+
+
+                    $end_point = 'will-be-here';
+
+                    $startTime = str_replace(' ','T',$data['startTime']);
+                    $finishTime = str_replace(' ','T',$data['finishTime']);
+
+                    if( is_array( $data['imageIds'] ) and count( $data['imageIds'] ) > 0 ){
+                        $imagesId = $data['imageIds'];
+                    }else{
+                        $imagesId = array();
+                    }
+
+
+                    $new_data = array(
+                        'latitude' =>  $data['lat'],
+                        'longitude' =>  $data['lng'],
+                        'startTime' =>  $startTime,
+                        'finishTime' =>  $finishTime,
+                    );
+
+                    $contentCard = array(
+                        'imageIds' => $imagesId,
+                        'text'   => $data['description'],
+                        'topicIds' => $data['tags'],
+                    );
+
+                    $new_data = json_encode($new_data);
+
+                }
+
+                break;
+
+        }
+
+
+        if( $new_data and $end_point ){
+
+
+
+            $return_data = $this->curlRequest(
+                $this->SERVER_PUBLIC_ADRESS,
+                "/geo-point/" . $end_point . "/" . $id ,
+                $token,
+                'PUT',
+                $new_data
+            );
+
+
+            if( $return_data['status'] == true ){
+
+                $return_update['point']['status'] = true;
+                $return_update['point']['data'] = $return_data['data'];
+
+                $update_data = json_decode( $return_data['data'], true );
+                if( is_array( $update_data['contentCard'] ) and isset( $update_data['contentCard']['id'])  and isset($contentCard)  ){
+                    $update_content_card = $this->updateContentCard(
+                        $update_data['contentCard']['id'],
+                        $token,
+                        $contentCard
+                    );
+                    if( $update_content_card['status'] == true ){
+                        $return_update['content']['status'] = true;
+                        $return_update['content']['data'] = $update_content_card['data'];
+                    }
+                }
+            }
+
+            return $return_update;
+
+        }
+
+
+        $return_update['error'] = 'Not valid data!';
+        return $return_update;
+
+
+    }
+
+
+
+
 
 
     // Get point data by id. @type set endpoint

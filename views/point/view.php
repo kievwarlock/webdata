@@ -50,6 +50,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     ?>
+
+
     <table class="table"   >
         <thead>
         <tr>
@@ -78,9 +80,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if( isset($points)  ){ ?>
 
-            <pre>
-                <?php print_r($users);?>
-            </pre>
+          <!--  <pre>
+                <?php /*print_r($users);*/?>
+            </pre>-->
 
             <?php
 
@@ -108,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <td>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success view-point-data"  data-type="<?=$point['type']?>" data-point="<?=$point['id']?>" data-token="<?= ( isset( $user_list[$point['ownerId']]) ) ? $user_list[$point['ownerId']]['token'] : '' ?>" aria-label="Left Align" data-toggle="modal" data-target="#view-event" ><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">View</span></button>
+                            <button type="button" class="btn btn-sm btn-success view-point-data"  data-type="<?=$point['type']?>" data-point="<?=$point['id']?>" data-token="<?= ( isset( $user_list[$point['ownerId']]) ) ? $user_list[$point['ownerId']]['token'] : '' ?>" aria-label="Left Align"  ><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">View</span></button>
                         </div>
 
                     </td>
@@ -130,6 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!-- Modal -->
 <div class="modal fade" id="view-event" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
+
         <div class="modal-content">
 
         </div>

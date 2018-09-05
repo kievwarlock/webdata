@@ -10,7 +10,8 @@ $(function () {
 
         this.mainSelector = '.upload-images-block';
         this.itemSelector =  '.upload-images-item';
-        this.item = '<div class="upload-images-item">' + $(this.itemSelector).html() + '</div>';
+        this.itemTemplate = '.upload-images-item-template';
+        this.item = '<div class="upload-images-item">' + $(this.itemTemplate).html() + '</div>';
         this.minImageCount = 1;
         this.maxImageCount = 5;
         this.imageType = 'image/jpeg';
@@ -23,7 +24,7 @@ $(function () {
                 alert( 'Max image count - ' + this.maxImageCount );
                 return false;
             }
-            $(this.mainSelector).append( this.item );
+            $(this.mainSelector).append( '<div class="upload-images-item">' + $(this.itemTemplate).html() + '</div>' );
         };
 
         this.clear = function (event) {
@@ -70,7 +71,7 @@ $(function () {
             var countUpload = data.length;
 
             for( var imageData of data ){
-                imageData.item.addClass('inProgress');
+
 
                 if( imageData.blob  ) {
 
@@ -79,8 +80,6 @@ $(function () {
                     form.append('image', imageData.blob);
                     form.append('token', userToken);
 
-
-                    console.log('form image/create :',form);
 
 
                     $.ajax({
@@ -92,21 +91,40 @@ $(function () {
                         processData: false,
                         success: function (res) {
 
-                            if (res) {
-                                console.log('CALLBACK OK RES', res );
-                                imageData.item.removeClass('inProgress')
-                                countUpload = parseInt(countUpload) - 1;
-                                resultArray += res + ',';
-                                if (countUpload == 0) {
-                                    console.log('END upload', resultArray);
-                                    formData.images = resultArray;
-                                    console.log('HERE WILL BE CREATE EVENT');
-                                    createEvent(userToken, type, formData);
+
+                            try {
+
+                                if (res) {
+
+                                    // TODO must check image request from API
+                                    addPushNotification('success', 'Image uploaded. Image id:' + res ,3000 );
+                                    countUpload = parseInt(countUpload) - 1;
+                                    resultArray += res + ',';
+
+                                    if (countUpload == 0) {
+                                        addPushNotification('success', 'All images was uploaded successful!' ,3000 );
+                                        formData.images = resultArray;
+                                        createEvent(userToken, type, formData);
+                                    }
+                                }else{
+
+
+
+                                    endLoader();
+                                    addPushNotification('error', 'Error image upload' , 2000 );
+
+
                                 }
+
+                            } catch (e) {
+                                endLoader();
+                                addPushNotification('error', 'Error' . e , 2000 );
+
                             }
                         },
                         error: function () {
-                            alert('Error!');
+                            endLoader();
+                            addPushNotification('error', 'Error' . e, 2000 );
                         }
                     });
 
@@ -157,7 +175,8 @@ $(function () {
 
                 if( file.target.files[0].type != this.imageType ) {
                     $(file.target).val('');
-                    alert('Image format - ' + this.imageType);
+                    addPushNotification('error', 'Image format - ' + this.imageType, 3500 );
+
                     return false;
                 }
 
@@ -234,7 +253,10 @@ $(function () {
 
         let lat = $('.form-item-block-map input[name="lat"]').val();
         let lng = $('.form-item-block-map input[name="lng"]').val();
-        let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').val() + ' GMT');
+        //let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').val() + ' GMT');
+
+        let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').datetimepicker('getDate') );
+
 
 
         var images = false;
@@ -243,9 +265,19 @@ $(function () {
         }
 
 
+        var tags = false;
+        if( $("#geo-tags").length > 0 ){
+            tags = $("#geo-tags").select2("data");
+        }
+
+
         let description = $('.form-item-block-description textarea[name="description"]').val();
-        let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').val() + ' GMT');
-        let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').val() + ' GMT');
+        //let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').val() + ' GMT');
+        //let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').val() + ' GMT');
+
+        let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').datetimepicker('getDate') );
+        let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').datetimepicker('getDate') );
+
 
         switch(type){
 
@@ -267,7 +299,7 @@ $(function () {
                     validResult.formData.lng= lng;
                 }
 
-                if( lastVisit.length == 0 ){
+                if( lastVisit.length == 0 || isNaN(lastVisit) === true ){
                     validResult.valid = false;
                     validResult.empty.push('lastVisit');
                     validResult.error_message += "<li>last visit is empty!</li>";
@@ -290,6 +322,8 @@ $(function () {
                 }
 
 
+
+
                 if( lng.length == 0 ){
                     validResult.valid = false;
                     validResult.empty.push('lng');
@@ -310,6 +344,14 @@ $(function () {
                     validResult.valid = false;
                     validResult.empty.push('images');
                     validResult.error_message += "<li>images is empty!</li>";
+                }
+
+                if( tags == false ){
+                    validResult.valid = false;
+                    validResult.empty.push('tags');
+                    validResult.error_message += "<li>Tags is empty!</li>";
+                }else{
+                    validResult.formData.tags= tags;
                 }
 
 
@@ -348,7 +390,7 @@ $(function () {
                     validResult.error_message += '<li>images is empty!</li>';
                 }
 
-                if( startTime.length == 0 ){
+                if( startTime.length == 0 || isNaN(startTime) === true ){
                     validResult.valid = false;
                     validResult.empty.push('startTime');
                     validResult.error_message += '<li>start Time is empty!</li>';
@@ -356,7 +398,7 @@ $(function () {
                     validResult.formData.startTime= startTime;
                 }
 
-                if( finishTime.length == 0 ){
+                if( finishTime.length == 0 || isNaN(finishTime) === true ){
                     validResult.valid = false;
                     validResult.empty.push('finishTime');
                     validResult.error_message += '<li>finish Time is empty!</li>';
@@ -364,6 +406,14 @@ $(function () {
                     validResult.formData.finishTime= finishTime;
                 }
 
+
+                if( tags == false ){
+                    validResult.valid = false;
+                    validResult.empty.push('tags');
+                    validResult.error_message += "<li>Tags is empty!</li>";
+                }else{
+                    validResult.formData.tags= tags;
+                }
 
 
                 break;
@@ -382,7 +432,7 @@ $(function () {
     function clearFormData(){
         uploadImage.clearAll();
         $('.upload-images-item').removeClass('success');
-        $('.upload-images-item').removeClass('inProgress');
+
         $('.uploadImageForm input').val('');
         $('.uploadImageForm textarea').val('');
     }
@@ -399,6 +449,8 @@ $(function () {
                 form-item-block-finish-time
                 form-item-block-submit
                 form-item-block-image
+
+                form-item-block-tags
         */
 
         clearFormData();
@@ -423,6 +475,10 @@ $(function () {
                 $('.form-item-block-map').show();
                 $('.form-item-block-image').show();
                 $('.form-item-block-description').show();
+
+
+                $('.form-item-block-tags').show();
+
                 $('.form-item-block-submit').show();
 
 
@@ -434,6 +490,9 @@ $(function () {
                 $('.form-item-block-description').show();
                 $('.form-item-block-start-time').show();
                 $('.form-item-block-finish-time').show();
+
+                $('.form-item-block-tags').show();
+
                 $('.form-item-block-submit').show();
 
 
@@ -488,17 +547,11 @@ $(function () {
     $('body').on('click', '.save-image-input' , function (event) {
 
 
-
-        $('.success-form').hide();
-        $('.error-form').hide();
-        $('.validation-form').hide();
-
-        //var userToken = $('.user-select option:selected').val()
         var userToken = currentUserToken;
 
-
         if( userToken.length == 0 ){
-            alert('Please select user!');
+
+            addPushNotification('error', 'Please select user!', 4000 );
             return false;
         }
 
@@ -508,9 +561,7 @@ $(function () {
         if( type.length > 0){
             let valid = validationForm( type );
             if( valid.valid == false ){
-                $('.fields-empty').html(valid.error_message);
-                $('.validation-form').show();
-
+                addPushNotification('error', valid.error_message , 6000 );
                 return false;
             }
 
@@ -519,17 +570,23 @@ $(function () {
 
                 case 'PROFILE':
 
+                    startLoader();
                     createEvent(userToken, type, valid.formData);
 
                     break;
 
                 case 'WAS_HERE':
 
+                    startLoader();
                     uploadImage.uploadImages( userToken, type, valid.formData );
+
+
                     break;
 
                 case 'WILL_BE_HERE':
 
+
+                    startLoader();
                     uploadImage.uploadImages( userToken, type, valid.formData );
 
                     break;
@@ -544,7 +601,7 @@ $(function () {
 
 
         }else{
-            alert('Please select type event!');
+            addPushNotification('error', 'Please select type event!', 4000 );
             return false;
         }
 
@@ -552,70 +609,219 @@ $(function () {
     });
 
 
+
+    // Update geo point
+    $('body').on('click', '.geo-point-update' , function (event) {
+
+        event.preventDefault();
+
+        var userToken = $('#geo-point-user-token').val();
+        var pointType = $('#geo-point-type').val();
+        var pointId = $('#geo-point-id').val();
+
+
+
+        if (userToken.length == 0) {
+            alert('NO user token!');
+            return false;
+        }
+        if (pointType.length == 0) {
+            alert('NO geo point type!');
+            return false;
+        }
+        if (pointId.length == 0) {
+            alert('NO geo point id!');
+            return false;
+        }
+
+        let valid = validationForm(pointType);
+        if (valid.valid == false) {
+
+            addPushNotification('error', valid.error_message, 5000 );
+            return false;
+        }
+
+        updateGeoPoint( pointId, userToken, pointType, valid.formData);
+
+
+
+
+    });
+
+
+
     // Create event
     function createEvent( userToken, type, formData ){
 
-        $('.save-image-input').hide();
-        $('.save-image-input-loader').show();
+
+        try {
+
+            var data = new FormData();
+            data.append('type', type);
+            data.append('token', userToken);
 
 
-        $('.success-form').hide();
-        $('.error-form').hide();
+            // TODO remove when ownerId not need
+            if( currentUserId.length <= 0){
+                alert('currentUserId not found!');
+                return false;
+            }
+            data.append('id', currentUserId);
 
-        var data = new FormData();
-        data.append('type', type);
-        data.append('token', userToken);
+            for (var prop in formData) {
 
-
-        // TODO remove when ownerId not need
-        if( currentUserId.length <= 0){
-            alert('currentUserId not found!');
-            return false;
-        }
-        data.append('id', currentUserId);
-
-        for (var prop in formData) {
-            data.append( prop, formData[prop]);
-        }
-        $.ajax({
-            url: '/point/create/',
-            type: 'POST',
-            data: data,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function (res) {
-
-                console.log('RESULT NEW POINT: ',res);
-                if (res) {
-
-                    let jsonEvent = JSON.parse(res);
-                    if( jsonEvent.id ){
-                        $('.success-form').show();
-                    }else{
-                        $('.error-form').show();
+                if( prop == "tags" ){
+                    for (var tags in formData[prop]) {
+                        data.append( 'tags[]', formData[prop][tags]['id'] );
                     }
-                    clearFormData();
-                    //console.log('RES :', res );
+                }else{
+                    data.append( prop, formData[prop]);
                 }
 
-                $('.save-image-input').show();
-                $('.save-image-input-loader').hide();
-
-
-            },
-            error: function () {
-                $('.save-image-input').show();
-                $('.save-image-input-loader').hide();
-                alert('Error!');
             }
-        });
+
+
+            $.ajax({
+                url: '/point/create/',
+                type: 'POST',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+
+                    endLoader();
+
+                    if (res) {
+                        try {
+
+                            let jsonEvent = JSON.parse(res);
+                            if( jsonEvent.id ){
+                                addPushNotification('success', 'New geo point was created successful!',0 );
+                                clearFormData();
+                            }else{
+                                throw new SyntaxError("Ошибка в данных json");
+                            }
+
+                        } catch (error) {
+                            addPushNotification('error', 'Error:' + error, 4000 );
+                        }
+
+
+                    }else{
+                        throw new SyntaxError("Ошибка в данных ответа!");
+                    }
+
+
+                },
+                error: function () {
+                    endLoader();
+                    addPushNotification('error', 'Error ajax!', 4000 );
+                }
+            });
+
+
+        } catch (e) {
+            endLoader();
+            addPushNotification('error', 'Error: code' + error, 4000 );
+        }
+
 
 
     }
 
 
 
+
+
+
+    // Update geo point
+    function updateGeoPoint( idPoint, userToken, type, formData ){
+
+
+        var data = new FormData();
+        data.append('id', idPoint);
+        data.append('type', type);
+        data.append('token', userToken);
+
+        if( $('.geo-point-images').length > 0 ){
+            $('.geo-point-images').each(function (e) {
+                data.append('imageIds[]', $(this).val() );
+            })
+        }
+
+        for (var prop in formData) {
+            if( prop == "tags" ){
+                for (var tags in formData[prop]) {
+                    data.append( 'tags[]', formData[prop][tags]['id'] );
+                }
+            }else{
+                data.append( prop, formData[prop]);
+            }
+        }
+
+
+        try {
+
+            startLoader();
+
+            $.ajax({
+                url: '/point/update/',
+                type: 'POST',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+
+                    endLoader();
+
+                    if (result) {
+
+                        try {
+
+                            var resultData =  JSON.parse(result);
+
+                            if (!resultData['point_status'] || !resultData['content_status'] ) {
+                                throw new SyntaxError("Ошибка в данных ответа!");
+                            }
+
+                            if( resultData['point_status'] == true ){
+                                addPushNotification('success', resultData['point_msg'],4000 );
+                            }else{
+                                addPushNotification('error', resultData['point_msg'],4000 );
+                            }
+
+                            if( resultData['content_status'] == true ){
+                                addPushNotification('success', resultData['content_msg'],4000 );
+                            }else{
+                                addPushNotification('error', resultData['content_msg'],4000 );
+                            }
+
+                        } catch ( error ) {
+                            addPushNotification('error', 'Code error:' + error,4000 );
+                        }
+
+
+                    }
+
+
+                },
+                error: function () {
+                    endLoader();
+                    addPushNotification('error', 'Code error:' + error,4000 );
+                }
+
+            });
+
+
+        } catch (e) {
+            endLoader();
+            addPushNotification('error', 'Code error:' + error,4000 );
+        }
+
+
+    }
 
 
 

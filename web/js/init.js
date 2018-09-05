@@ -35,40 +35,68 @@ $(function () {
 
     $('body').on('click', '.view-point-data', function(){
 
-        let pointId = $(this).data('point');
-        let userToken = $(this).data('token');
-        let pointType = $(this).data('type');
+        startLoader();
 
-        $('#view-event .modal-content').html('Loading...');
+        try {
+
+            $('#view-event .modal-content').html('Loading...');
+            let pointId = $(this).data('point');
+            let userToken = $(this).data('token');
+            let pointType = $(this).data('type');
+
+            $.ajax({
+                url: '/point/view-item/',
+                type: 'POST',
+                data: {
+                    owner_user_token: userToken,
+                    point_id: pointId,
+                    point_type: pointType,
+                },
+                success: function(res){
+
+                    endLoader();
+
+                    if( res ){
+
+                        $('#view-event').modal('show');
+                        setTimeout(function () {
+                            $('#view-event .modal-content').html(res);
+                            addPushNotification('success', 'Geo point loaded success!',2000 );
+                        }, 200)
 
 
-        $.ajax({
-            url: '/point/view-item/',
-            type: 'POST',
-            data: {
-                owner_user_token: userToken,
-                point_id: pointId,
-                point_type: pointType,
-            },
-            success: function(res){
-                console.log(res);
-                if( res ){
-                    $('#view-event .modal-content').html(res);
+                    }
+
+                },
+                error: function(){
+
+                    endLoader();
+                    addPushNotification('error', 'Geo point not loaded! Please try again!',3500 );
+
                 }
-            },
-            error: function(){
-                //alert('Error!');
-                $('#view-event .modal-content').html('Error!');
-            }
-        });
+            });
+
+        } catch (error) {
+            endLoader();
+            addPushNotification('error', 'Code error! Please try again! Error: ' + error,3500 );
+        } finally {
+
+        }
+
+
+
+
+
+
+
+
     })
 
 
 
     function loadProfile( userId, userToken, userPhone ){
 
-        $('.success-form').hide();
-        $('.error-form').hide();
+
 
         $.ajax({
             url: '/user/view/',
@@ -79,19 +107,20 @@ $(function () {
                 user_phone: userPhone,
             },
             success: function(res){
-                //console.log(res);
+
                 if( res ){
                     $('#edit-user-profile .modal-content').html(res);
                     $('#edit-user-profile').modal('show');
 
                 }else{
-                    alert('Error! Try more');
+                    addPushNotification('error', 'Error, try again!', 3000 );
                 }
 
             },
             error: function(){
-                alert('Error!');
+                addPushNotification('error', 'Error, try again!', 3000 );
                 $('#edit-user-profile .modal-content').html('Error!');
+                $('#edit-user-profile').modal('hide');
             }
         });
     }
@@ -111,25 +140,39 @@ $(function () {
     })
 
 
+
+    $('.pjax-container').on('pjax:start',   function() {
+        startLoader();
+    });
+
     $('.pjax-container').on('pjax:end',   function() {
+        endLoader();
+        addPushNotification('success', 'Creating user success!', 2000 );
         $('.new-user.edit-user-profile').trigger('click');
     });
 
 
 
+
+
     $('body').on('click', '.generateUser', function(){
 
-        $('.success-form').hide();
+        startLoader();
+        addPushNotification('', 'Creating user, wait please...', 2000 );
+
+       /* $('.success-form').hide();
         $('.error-form').hide();
         console.log('ADD USER!');
-        $('.window-description').html('Creating user, wait please...');
+        $('.window-description').html('Creating user, wait please...');*/
 
         $.ajax({
             url: '/site/add/',
             type: 'POST',
             data: '',
             success: function(res){
-                //console.log(res);
+
+                endLoader();
+
                 if( res ){
 
 
@@ -141,8 +184,6 @@ $(function () {
                     }
 
                     let userPhone = $('.new-user').data('phone');
-
-
 
 
                     // Создаётся объект promise

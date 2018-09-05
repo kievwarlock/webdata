@@ -195,6 +195,23 @@ if( is_array($all_users) and !empty($current_user_id)){
                                 <input type="text" id="finish-time" name="finish-time" class="time-ui form-control"  placeholder="Время">
                             </div>
 
+
+                            <?php if( is_array( $topic ) ) { ?>
+                                <div class="form-group form-item-block form-item-block-tags">
+                                    <label for="">Tags</label>
+                                    <?php
+                                    echo \kartik\select2\Select2::widget([
+                                        'id' => 'geo-tags',
+                                        'name' => 'geo-tags',
+                                        'hideSearch' => false,
+                                        'data' => \yii\helpers\ArrayHelper::map($topic, 'id', 'text'),
+                                        'options' => ['multiple' => true, 'placeholder' => 'Select a tags']
+                                    ]);
+                                    ?>
+                                </div>
+                            <?php } ?>
+
+
                             <div class="form-group form-item-block form-item-block-submit">
                                 <button type="button" class="btn btn-success save-image-input"> Create event</button>
                                 <p class="save-image-input-loader">
@@ -233,6 +250,37 @@ if( is_array($all_users) and !empty($current_user_id)){
 
 
                             <div class="upload-images-block">
+
+                                <div class="upload-images-item-template">
+                                    <div class="upload-images-item-inner">
+                                        <div class="upload-images-item-crop"></div>
+                                        <div class="upload-images-item-crop-placeholder"></div>
+                                        <div class="upload-images-item-actions">
+                                            <div class="btn-group-vertical text-left">
+                                                <div class="btn btn-danger upload-images-action-remove" data-toggle="tooltip" data-placement="left" title="Remove" >
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                </div>
+                                                <div class="btn btn-info upload-images-action-clear" data-toggle="tooltip" data-placement="left" title="Clear">
+                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                                </div>
+                                                <div class="btn btn-primary upload-images-action-rotate" data-toggle="tooltip" data-placement="left" title="Rotate">
+                                                    <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                                                </div>
+                                                <div class="btn btn-warning upload-images-action-upload" data-toggle="tooltip" data-placement="left" title="Upload" >
+                                                    <input type="file">
+                                                    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                                                </div>
+                                                <div class="btn btn-primary upload-images-action-view" data-toggle="tooltip" data-placement="left" title="View">
+                                                    <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+                                                </div>
+                                                <div class="btn btn-success upload-images-action-add" data-toggle="tooltip" data-placement="left" title="Add">
+                                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="upload-images-item">
                                     <div class="upload-images-item-inner">
                                         <div class="upload-images-item-crop"></div>

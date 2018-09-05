@@ -21,6 +21,8 @@ class AppMapAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
+        'css/notifications.css',
+
         'css/jquery-ui/jquery-ui.css',
         'css/jquery-ui/jquery-ui.structure.min.css',
         'css/jquery-ui/jquery-ui.theme.min.css',
@@ -30,6 +32,9 @@ class AppMapAsset extends AssetBundle
         'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.css',
     ];
     public $js = [
+
+        'js/notifications.js',
+
         'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.js',
         'https://npmcdn.com/@turf/turf/turf.min.js',
         'js/ui/jquery-ui.js',

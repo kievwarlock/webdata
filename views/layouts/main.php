@@ -202,6 +202,52 @@ if( $this->context->module->requestedRoute ==  'point/index' ){
 </main>
 
 
+<div class="ajax-loader">
+    <img src="/web/img/loaders/preloader.gif" alt="">
+</div>
+
+<div class="push-notifications">
+    <div class="push-notification-item-default hidden">
+        <div class="push-notification-inner">
+            <div class="push-notification-inner-close">
+                <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+            </div>
+            <div class="push-notification-inner-icon">
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+            </div>
+            <div class="push-notification-inner-message">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="push-notification-item success ">
+        <div class="push-notification-inner">
+            <div class="push-notification-inner-close">
+                <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+            </div>
+            <div class="push-notification-inner-icon">
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+            </div>
+            <div class="push-notification-inner-message">
+                Тут сообщение об ошибке
+            </div>
+        </div>
+    </div>
+    <div class="push-notification-item error ">
+        <div class="push-notification-inner">
+            <div class="push-notification-inner-close">
+                <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+            </div>
+            <div class="push-notification-inner-icon">
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+            </div>
+            <div class="push-notification-inner-message">
+                Тут сообщение об ошибке
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <?php $this->endBody() ?>

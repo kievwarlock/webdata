@@ -10,36 +10,18 @@ class ImageDataModel extends  ServerModel  {
 
     public function getImage( $image_id , $token , $size = 'preview' ){
 
-        if( !$image_id and !$token ){
+        if( !$image_id and !$token){
             return false;
         }
 
-        $curl = curl_init();
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            '/image/' . $size . '/' . $image_id,
+            $token
+        );
 
-        curl_setopt_array($curl, array(
+        return $return_data;
 
-            CURLOPT_URL => $this->http_address . "/image/" . $size . "/" . $image_id,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => array(
-                "Cache-Control: no-cache",
-                "X-Auth-Token:" . $token
-            ),
-        ));
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-
-        curl_close($curl);
-
-        if ($err) {
-            //echo "cURL Error #:" . $err;
-            return false;
-        } else {
-            //echo $response;
-            $base64 = 'data:image/jpeg;base64,' . base64_encode($response);
-            return $base64;
-        }
 
 
     }
@@ -87,6 +69,7 @@ class ImageDataModel extends  ServerModel  {
         curl_close($curl);
 
         if ($err) {
+            //return 'CODE:' . $httpcode . ' RESP: ' . $response . ' ERROR: ' .  $err;
             return false;
         }
         if( $httpcode == 200 ){
@@ -95,8 +78,8 @@ class ImageDataModel extends  ServerModel  {
                 return $data['id'];
             }
         }
-
         return false;
+        //return 'CODE:' . $httpcode . ' RESP: ' . $response . ' ERROR: ' .  $err;
 
     }
 

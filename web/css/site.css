@@ -330,6 +330,16 @@ body {
     margin: 0;
     padding: 0;
 }
+
+.ui-widget.ui-widget-content {
+    border: 1px solid #c5c5c5;
+    z-index: 2000 !important;
+}
+
+.upload-images-item-template {
+    display: none;
+}
+
 .sidebar-nav-menu img {
 
     max-width: 18px;
@@ -862,6 +872,10 @@ table tr td {
 table.dataTable {
     width: 100% !important;
 }
+
+
+
+
 
 
 @media screen and ( max-width: 767px ) {

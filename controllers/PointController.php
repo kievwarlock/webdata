@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\ImageDataModel;
 use app\models\PointDataModel;
+use app\models\TopicDataModel;
 use app\models\UserDataModel;
 use Yii;
 use yii\filters\AccessControl;
@@ -63,12 +65,41 @@ class PointController extends MainController
                 $pointData = $pointModel->getPointById( $data['point_id'], $data['owner_user_token'], str_replace('_','-',$data['point_type']) );
 
                 if( $pointData["status"] === true ){
-                    //return var_dump( json_decode($pointData["data"], true ) );
+
+                    $point_data = json_decode($pointData["data"], true);
+
+                    $images_array = false;
+
+                    if( is_array( $point_data['contentCard']['imageIds'] ) and count( $point_data['contentCard']['imageIds'] ) > 0 ) {
+                        foreach ( $point_data['contentCard']['imageIds'] as $imageId ) {
+                            $image_model = new ImageDataModel();
+                            $image_data = $image_model->getImage( $imageId, $data['owner_user_token'] );
+
+                            if( $image_data['status'] === true ) {
+                                $images_array[] =  'data:image/jpeg;base64,' . base64_encode( $image_data['data'] );
+                            }else{
+                                //$images_array[] =  $image_data['error'];
+                            }
+                        }
+
+                    }
+
+
+                    $topic_model = new TopicDataModel();
+                    $topic = $topic_model->getTopics($data['owner_user_token']);
+                    $topic_data = false;
+                    if( $topic['status'] == true ){
+                        $topic_data = json_decode( $topic['data'], true );
+                    }
+
+                    //return var_dump($images_array);
+
 
                     return $this->renderAjax('modal/point',[
-                        'point_data' => json_decode($pointData["data"]),
-                        //'user_phone' => $user_phone,
-                        //'images' => $images,
+                        'point_data' => $point_data,
+                        'images' => $images_array,
+                        'token' => $data['owner_user_token'],
+                        'topic' => $topic_data,
                     ]);
                 }
 
@@ -162,9 +193,22 @@ class PointController extends MainController
         $user_id = Yii::$app->getRequest()->getQueryParam('id');
         $userDataModel = new UserDataModel();
         $usersArray = $userDataModel->getUsersArray();
+
+
+
         if( $usersArray['status'] === true ){
+
+            $topic_model = new TopicDataModel();
+            $topic = $topic_model->getTopics($usersArray['data'][0]["token"]);
+
+            $topic_data = false;
+            if( $topic['status'] == true ){
+                $topic_data = json_decode( $topic['data'], true );
+            }
+
             return $this->render('index',[
                 'current_user_id' => $user_id,
+                'topic' => $topic_data,
                 'all_users' => $usersArray['data'],
             ]);
         }else{
@@ -187,8 +231,6 @@ class PointController extends MainController
 
             if( isset($data['type']) and !empty($data['type']) and isset($data['token']) and !empty($data['token'])  ){
 
-
-
                 $model = new PointDataModel();
                 $createPoint = $model->createPoint( $data, $data['token'] );
 
@@ -205,6 +247,60 @@ class PointController extends MainController
         return false;
     }
 
+
+
+    public function actionUpdate()
+    {
+        if (Yii::$app->request->isAjax) {
+
+            $data = Yii::$app->request->post();
+
+            if( isset($data['type']) and !empty($data['type']) and
+                isset($data['token']) and !empty($data['token']) and
+                isset($data['id']) and !empty($data['id'])
+            ){
+
+                $return_update = array(
+                    'point_status' => false,
+                    'content_status' => false,
+                    'point_msg' => 'Geo point was not update! Please try again later!',
+                    'content_mgs' => 'Content was not update! Please try again later!',
+                );
+
+                $model = new PointDataModel();
+
+                $createPoint = $model->updatePoint( $data['id'], $data, $data['token'] );
+
+                if( is_array($createPoint["point"]) ){
+                    if( $createPoint["point"]['status'] == true ){
+                        $return_update['point_status'] = true;
+                        $return_update['point_msg'] = 'Geo point was update successful!';
+                    }else{
+                        $return_update['point_status'] = false;
+                        $return_update['point_msg'] = $createPoint["point"]['error'] ;
+                    }
+                }
+                if( is_array($createPoint["content"]) ){
+                    if( $createPoint["content"]['status'] == true ){
+                        $return_update['content_status'] = true;
+                        $return_update['content_msg'] = 'Content was update successful!';
+                    }else{
+                        $return_update['content_status'] = false;
+                        $return_update['content_msg'] = $createPoint["content"]['error'] ;
+                    }
+                }
+
+                return json_encode($return_update);
+
+
+
+
+            }
+
+        }
+
+        return false;
+    }
 
 
     public function actionView_event_item(){
