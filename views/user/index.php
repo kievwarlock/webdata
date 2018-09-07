@@ -73,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     }
                     ?>
-                    <tr class="<?=$new_user_class?> edit-user-profile"    data-phone="<?=$user_item['phoneNumber']?>"  data-id="<?=$user_item['id']?>"   data-token="<?=$user_item['token']?>" >
+                    <tr class="<?=$new_user_class?> "    data-phone="<?=$user_item['phoneNumber']?>"  data-id="<?=$user_item['id']?>"   data-token="<?=$user_item['token']?>" >
                         <td scope="row"><?=$cnt?></td>
                         <td><?=$user_item['phoneNumber']?></td>
                         <td ><?=$user_item['token']?></td>
@@ -81,10 +81,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td >
 
                             <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-danger" data-token="<?=$user_item['token']?>" data-id="<?=$user_item['id']?>" aria-label="Left Align" data-toggle="modal" data-target="#edit-user-profile" ><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Edit profile</span></button>
+                                <button type="button" class="btn btn-sm btn-danger edit-user-profile" data-phone="<?=$user_item['phoneNumber']?>"  data-id="<?=$user_item['id']?>"   data-token="<?=$user_item['token']?>"  ><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Edit profile</span></button>
                             </div>
+
                             <div class="btn-group">
-                                <a href="/event/add/<?=$user_item['id']?>" type="button" class="btn  btn-sm btn-success" aria-label="Left Align"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Add event</span></a>
+                                <a href="/point/index?id=<?=$user_item['id']?>" type="button" class="btn  btn-sm btn-success" aria-label="Left Align"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Add event</span></a>
                             </div>
                             <div class="btn-group">
                                 <a href="/event/list/<?=$user_item['id']?>" type="button" class="btn  btn-sm btn-info" aria-label="Left Align"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">User events</span></a>

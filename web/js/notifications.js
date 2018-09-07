@@ -8,8 +8,11 @@ $('.push-notifications').on('click', '.push-notification-inner-close' , function
 
 function addPushNotification(type, message, time) {
 
+    var dataCount =  parseInt( $('.push-notifications').data('count') );
+    $('.push-notifications').data('count',dataCount  + 1 );
+
     var pushItemHtml = $('.push-notification-item-default').html();
-    var newPushId = 'pushItem-' + $('.push-notification-item').length ;
+    var newPushId = 'pushItem-' + parseInt( $('.push-notifications').data('count') );
 
     $('.push-notifications').append('<div id="'+ newPushId +'" class="push-notification-item '+ type +' " >'+ pushItemHtml +'</div>');
     $('#'+newPushId+' .push-notification-inner-message').html(message);

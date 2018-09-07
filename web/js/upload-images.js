@@ -697,7 +697,7 @@ $(function () {
 
                             let jsonEvent = JSON.parse(res);
                             if( jsonEvent.id ){
-                                addPushNotification('success', 'New geo point was created successful!',0 );
+                                addPushNotification('success', 'New geo point was created successful!' );
                                 clearFormData();
                             }else{
                                 throw new SyntaxError("Ошибка в данных json");

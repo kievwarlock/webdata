@@ -170,11 +170,7 @@ class UserController extends MainController
                 $token = $data['token'];
                 $UserDataModel = new UserDataModel();
 
-                //unset($data['id']);
-                //unset($data['token']);
-               /* if( isset($data['phoneNumber']) ){
-                    unset($data['phoneNumber']);
-                }*/
+
                 if( isset($data['visible']) ){
                     if( $data['visible'] == 1){
                         $data['visible'] = true;

@@ -14,12 +14,22 @@ $(function () {
     /**** END pjax:success ****/
 
 
+    $('.pjax-container').on('pjax:start',   function() {
+        startLoader();
+    });
+
+    $('.pjax-container').on('pjax:end',   function() {
+        endLoader();
+        addPushNotification('success', 'Creating user success!', 2000 );
+        $('.new-user .edit-user-profile').trigger('click');
+    });
+
+
 
     $('#menu-init').on('click', function () {
         $(this).toggleClass('active');
         $('.main-sidebar').toggleClass('active');
     })
-
 
     if( $('.sort-table').length > 0 ){
         $('.sort-table').DataTable( {
@@ -30,6 +40,136 @@ $(function () {
 
 
 
+    function loadProfile( userId, userToken, userPhone ){
+
+        startLoader();
+
+        try {
+
+            $.ajax({
+                url: '/user/view/',
+                type: 'POST',
+                data: {
+                    user_id: userId,
+                    user_token: userToken,
+                    user_phone: userPhone,
+                },
+                success: function(res){
+
+                    endLoader();
+
+                    if( res ){
+                        $('#edit-user-profile .modal-content').html(res);
+                        $('#edit-user-profile').modal('show');
+                        addPushNotification('success', 'Profile was loaded!', 3000 );
+                    }else{
+                        addPushNotification('error', 'Error, try again!', 3000 );
+                    }
+
+                },
+                error: function(){
+                    endLoader();
+                    addPushNotification('error', 'Error, try again!', 3000 );
+                    $('#edit-user-profile .modal-content').html('Error!');
+                    $('#edit-user-profile').modal('hide');
+                }
+            });
+
+        } catch (e) {
+            endLoader();
+            addPushNotification('error', 'Load profile error: ' + e , 3000 );
+        }
+
+
+    }
+
+    function updateProfile( blob = false) {
+
+        startLoader();
+
+        try {
+
+            var formData = new FormData( $('.save-user-profile')[0] );
+            if( blob instanceof Blob){
+                formData.append('image', blob );
+            }
+
+
+            $.ajax({
+                url: '/user/update',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res){
+
+                    endLoader();
+
+                    if( res === false ){
+                        addPushNotification('error', 'No data changes!', 3000 );
+                    }else{
+                        try {
+
+                            var data = JSON.parse(res);
+
+                            if(  data['status_avatar'] ){
+                               if(  data['status_avatar'] && data['status_avatar'] == true ){
+                                   addPushNotification('success', 'Avatar updated successful!', 3000 );
+                               }else{
+                                   addPushNotification('error', 'Avatar not updated! Error:' + data['error_avatar'] , 3000 );
+                               }
+                            }
+
+                            if( data['status_fields'] ){
+                                if ( data['status_fields'] == true) {
+                                    addPushNotification('success', 'Profile updated successful!', 3000 );
+                                } else {
+                                    addPushNotification('error', 'Profile not updated! Error:' + data['error_fields'] , 3000 );
+                                }
+                            }
+
+
+                        } catch (e) {
+                            addPushNotification('error', 'Code Error:' + e , 3000 );
+                        }
+                    }
+
+
+                },
+                error: function(){
+                    endLoader();
+                    addPushNotification('error', 'Error ajax request!', 3000 );
+                }
+
+            });
+
+        } catch (error) {
+            endLoader();
+            addPushNotification('error', 'Code update profile Error :' + error , 3000 );
+        }
+
+
+        return false;
+
+    };
+
+    function getBlob( croppieItem ) {
+
+        if (croppieItem.length > 0) {
+
+            croppieItem.croppie('result', {
+                type: 'blob',
+                size: {width: 1024, height: 1024},
+                format:'jpeg',
+            }).then( function ( blob ) {
+
+                updateProfile(blob);
+
+            });
+        }
+
+
+    };
 
 
 
@@ -86,45 +226,7 @@ $(function () {
 
 
 
-
-
-
-
     })
-
-
-
-    function loadProfile( userId, userToken, userPhone ){
-
-
-
-        $.ajax({
-            url: '/user/view/',
-            type: 'POST',
-            data: {
-                user_id: userId,
-                user_token: userToken,
-                user_phone: userPhone,
-            },
-            success: function(res){
-
-                if( res ){
-                    $('#edit-user-profile .modal-content').html(res);
-                    $('#edit-user-profile').modal('show');
-
-                }else{
-                    addPushNotification('error', 'Error, try again!', 3000 );
-                }
-
-            },
-            error: function(){
-                addPushNotification('error', 'Error, try again!', 3000 );
-                $('#edit-user-profile .modal-content').html('Error!');
-                $('#edit-user-profile').modal('hide');
-            }
-        });
-    }
-
 
     $('body').on('click', '.edit-user-profile', function(){
 
@@ -138,22 +240,6 @@ $(function () {
         loadProfile(userId, userToken, userPhone);
 
     })
-
-
-
-    $('.pjax-container').on('pjax:start',   function() {
-        startLoader();
-    });
-
-    $('.pjax-container').on('pjax:end',   function() {
-        endLoader();
-        addPushNotification('success', 'Creating user success!', 2000 );
-        $('.new-user.edit-user-profile').trigger('click');
-    });
-
-
-
-
 
     $('body').on('click', '.generateUser', function(){
 
@@ -240,100 +326,6 @@ $(function () {
         return false;
 
     });
-
-
-
-
-
-    function updateProfile( blob = false) {
-
-
-        var formData = new FormData( $('.save-user-profile')[0] );
-
-        if( blob instanceof Blob){
-            formData.append('image', blob );
-        }
-
-
-        $.ajax({
-            url: '/user/update',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(res){
-
-                var showSuccessModal = false;
-                var showDangerModal = false;
-                $('.save-user-profile-status.bg-success').text('');
-                $('.save-user-profile-status.bg-danger').text('');
-
-                if( res === false ){
-                    showDangerModal = true;
-                    $('.save-user-profile-status.bg-danger').text('No data changes!');
-                }else{
-                    var data = JSON.parse(res);
-
-
-                    console.log('DATA:',data);
-                    if( typeof(data.status_avatar) != "undefined" && data.status_avatar !== null ){
-                        if( data.status_avatar == true ){
-                            showSuccessModal = true;
-                            $('.save-user-profile-status.bg-success').text( $('.save-user-profile-status.bg-success').text() + 'Avatar updated successful! ')
-                        }else{
-                            showDangerModal = true;
-                            $('.save-user-profile-status.bg-danger').text( $('.save-user-profile-status.bg-danger').text() + 'Avatar not updated! Error:' + data.error_avatar);
-                        }
-                    }
-                    if( typeof(data.status_fields) != "undefined" && data.status_fields !== null ) {
-                        if (data.status_fields == true) {
-                            showSuccessModal = true;
-                            $('.save-user-profile-status.bg-success').text($('.save-user-profile-status.bg-success').text() + ' Profile updated successful!')
-                        } else {
-                            showDangerModal = true;
-                            $('.save-user-profile-status.bg-danger').text($('.save-user-profile-status.bg-danger').text() + 'Profile not updated! Error:' + data.error_fields);
-                        }
-                    }
-                }
-
-                if( showSuccessModal == true){
-                    $('.save-user-profile-status.bg-success').show();
-                    /*setTimeout(function () {
-                        $('#edit-user-profile').modal('hide');
-                    }, 1500 );*/
-                }
-                if( showDangerModal == true){
-                    $('.save-user-profile-status.bg-danger').show();
-                }
-
-            },
-            error: function(){
-                alert('Error!');
-            }
-
-        });
-
-        return false;
-
-    };
-
-    function getBlob( croppieItem ) {
-
-        if (croppieItem.length > 0) {
-
-            croppieItem.croppie('result', {
-                type: 'blob',
-                size: {width: 1024, height: 1024},
-                format:'jpeg',
-            }).then( function ( blob ) {
-
-                updateProfile(blob);
-
-            });
-        }
-
-
-    };
 
     $('body').on('submit', '.save-user-profile', function (event) {
 
