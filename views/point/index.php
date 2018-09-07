@@ -8,7 +8,7 @@ use yii\helpers\Html;
 $this->title = 'Add event';
 $this->params['breadcrumbs'][] = $this->title;
 
-if( is_array($all_users) and !empty($current_user_id)){
+if( is_array($all_users) and !empty($current_user_id) ){
 
     foreach ( $all_users as $user_item ) {
         if( $user_item['token'] == $current_user_id ){
@@ -32,7 +32,7 @@ if( is_array($all_users) and !empty($current_user_id)){
     <div class="window-description">
 
         <?php
-        if ( is_array($current_user_data) ) {
+        if ( isset($current_user_data) and is_array($current_user_data) ) {
              ?>
             <p>
                 Selected user : <?=$current_user_data['phoneNumber']?>

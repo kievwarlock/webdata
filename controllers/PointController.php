@@ -213,7 +213,7 @@ class PointController extends MainController
             ]);
         }else{
             return $this->render('index',[
-                'current_user_id' => '',
+                'current_user_id' => false,
                 'all_users' => '',
                 'error' => $usersArray['error']
             ]);
