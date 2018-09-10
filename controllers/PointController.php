@@ -199,18 +199,22 @@ class PointController extends MainController
         if( $usersArray['status'] === true ){
 
             $topic_model = new TopicDataModel();
-            $topic = $topic_model->getTopics($usersArray['data'][0]["token"]);
-
             $topic_data = false;
-            if( $topic['status'] == true ){
-                $topic_data = json_decode( $topic['data'], true );
+
+            if( isset($usersArray['data'][0]["token"]) ){
+                $topic = $topic_model->getTopics($usersArray['data'][0]["token"]);
+                if( $topic['status'] == true ){
+                    $topic_data = json_decode( $topic['data'], true );
+                }
             }
+
 
             return $this->render('index',[
                 'current_user_id' => $user_id,
                 'topic' => $topic_data,
                 'all_users' => $usersArray['data'],
             ]);
+
         }else{
             return $this->render('index',[
                 'current_user_id' => false,
