@@ -55,7 +55,10 @@ class UserDataModel extends  ServerModel {
         );
 
         if( is_array($return_data) and $return_data['status'] === true ){
-            return $return_data['data'];
+            $response_data = json_decode($return_data['data'], true );
+            if( isset( $response_data["activationCode"] ) and !empty( $response_data["activationCode"] ) ) {
+                return $response_data["activationCode"];
+            }
         }
         return false;
 
@@ -66,6 +69,7 @@ class UserDataModel extends  ServerModel {
     public function addNewUser( $oldPhoneNumber = false ){
 
         $usersArray = $this->getUsersArray();
+
 
         if( !is_array($usersArray) and $usersArray['status'] === false ) return false;
 
@@ -81,12 +85,9 @@ class UserDataModel extends  ServerModel {
             $sms_code = $this->getSmsCode($new_phone_number);
 
 
-
-
             if( $sms_code ){
 
                 $token = $this->getUserToken($new_phone_number, $sms_code );
-
 
 
                 if( $token ){
@@ -127,7 +128,10 @@ class UserDataModel extends  ServerModel {
         );
 
         if( is_array($return_data) and $return_data['status'] === true ){
-            return $return_data['data'];
+            $response_data = json_decode($return_data['data'], true );
+            if( isset( $response_data["authToken"] ) and !empty( $response_data["authToken"] ) ) {
+                return $response_data["authToken"];
+            }
         }
         return false;
 

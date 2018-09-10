@@ -16,6 +16,7 @@ use app\models\Datausers;
 use app\models\UserModel;
 use yii\base\ErrorException;
 
+
 class UserController extends MainController
 {
     /**
@@ -53,15 +54,18 @@ class UserController extends MainController
     {
 
 
+
         $userDataModel = new UserDataModel();
 
         $users_data = $userDataModel->getUsersArray();
 
         if($users_data['status'] === true ){
+
             return $this->render('index',[
                 'users' => $users_data['data'] ,
             ]);
         }else{
+            Yii::warning("User data not found1.");
             return $this->render('index',[
                 'users' => '' ,
                 'error' => $users_data['error']
@@ -94,6 +98,7 @@ class UserController extends MainController
             }
 
         }
+
         throw new NotFoundHttpException('Hey! You cant do that!');
 
 

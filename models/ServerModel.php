@@ -3,6 +3,8 @@ namespace app\models;
 
 
 
+use yii\web\BadRequestHttpException;
+
 class ServerModel  {
 
     protected $SECURITY_USER_NAME = 'admin';
@@ -81,12 +83,14 @@ class ServerModel  {
         curl_close($curl);
 
 
+
         if ( $return['http_code'] == 200 ) {
             $return['status'] = true;
             $return['data'] = $response;
         }else{
             $return['status'] = false;
             $return['error'] = 'Res:'. $response . ' | ' . $error . ' | CODE: ' . $return['http_code'];
+            throw new BadRequestHttpException( 'REQUEST ERROR: ' . $return['error'] );
         }
 
         return $return;
