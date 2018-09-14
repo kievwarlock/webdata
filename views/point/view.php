@@ -131,11 +131,12 @@ if( isset($_GET['id']) ){
 
                 <div class="profile-geo-points">
 
-
-                    <?= $this->render('geo-points.php',[
-                        'array_point_by_type' => $array_point_by_type,
-                        'token' => $user_data['token'],
-                    ]) ?>
+                    <?php if( isset($array_point_by_type) ){ ?>
+                        <?= $this->render('geo-points.php',[
+                            'array_point_by_type' => $array_point_by_type,
+                            'token' => $user_data['token'],
+                        ]) ?>
+                    <?php } ?>
 
                 </div>
 
