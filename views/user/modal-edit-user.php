@@ -47,7 +47,9 @@ $visible_status = [
 
 <form class="save-user-profile">
     <div class="modal-body">
-        <?//=ProfileFormWidget::widget(['data' => $full_user_data ])  ?>
+        <?php
+        //=ProfileFormWidget::widget(['data' => $full_user_data ])
+        ?>
 
 
         <input type="hidden" name="token" value="<?= $token ?>">

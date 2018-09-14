@@ -6,6 +6,12 @@ use yii\helpers\Html;
 
 $this->title = 'Geo points';
 $this->params['breadcrumbs'][] = $this->title;
+
+$selected_user_id = false;
+if( isset($_GET['id']) ){
+    $selected_user_id = $_GET['id'];
+}
+
 ?>
 
 
@@ -51,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </option>
                     <?php foreach ($user_list as $user) { ?>
 
-                        <option <?= ($user['id'] == $_GET['id']) ? 'selected=selected' : ''; ?> value="<?= $user['id'] ?>">
+                        <option <?= ( $user['id'] == $selected_user_id ) ? 'selected=selected' : ''; ?> value="<?= $user['id'] ?>">
                             <?= $user['phoneNumber'] ?>
                         </option>
 

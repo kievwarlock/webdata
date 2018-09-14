@@ -72,20 +72,20 @@ class PointController extends MainController
                     $point_data = json_decode($pointData["data"], true);
 
                     $images_array = false;
+                    if( is_array($point_data['contentCard']) ){
+                        if( is_array( $point_data['contentCard']['imageIds'] ) and count( $point_data['contentCard']['imageIds'] ) > 0 ) {
+                            foreach ( $point_data['contentCard']['imageIds'] as $imageId ) {
+                                $image_model = new ImageDataModel();
+                                $image_data = $image_model->getImage( $imageId, $data['owner_user_token'] );
 
-                    if( is_array( $point_data['contentCard']['imageIds'] ) and count( $point_data['contentCard']['imageIds'] ) > 0 ) {
-                        foreach ( $point_data['contentCard']['imageIds'] as $imageId ) {
-                            $image_model = new ImageDataModel();
-                            $image_data = $image_model->getImage( $imageId, $data['owner_user_token'] );
-
-                            if( $image_data['status'] === true ) {
-                                $images_array[] =  'data:image/jpeg;base64,' . base64_encode( $image_data['data'] );
-                            }else{
-                                //$images_array[] =  $image_data['error'];
+                                if( $image_data['status'] === true ) {
+                                    $images_array[] =  'data:image/jpeg;base64,' . base64_encode( $image_data['data'] );
+                                }
                             }
-                        }
 
+                        }
                     }
+
 
 
                     $topic_model = new TopicDataModel();
