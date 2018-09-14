@@ -72,7 +72,7 @@ class PointController extends MainController
                     $point_data = json_decode($pointData["data"], true);
 
                     $images_array = false;
-                    if( is_array($point_data['contentCard']) ){
+                    if( isset($point_data['contentCard']) ){
                         if( is_array( $point_data['contentCard']['imageIds'] ) and count( $point_data['contentCard']['imageIds'] ) > 0 ) {
                             foreach ( $point_data['contentCard']['imageIds'] as $imageId ) {
                                 $image_model = new ImageDataModel();
