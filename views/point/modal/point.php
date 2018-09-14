@@ -23,26 +23,21 @@ if( is_array($point_data) ){?>
                 </div>
             </div>
 
-            <!--<pre>
-                <?php /*print_r($point_data); */?>
-            </pre>-->
-            <!--
-            <?php /*if( is_array( $images ) ){*/?>
-                <pre>
-                    <?php /*print_r($images);*/?>
-                </pre>
-            --><?php /*} */?>
+
 
             <input type="hidden" name="geo-point-type" id="geo-point-type" value="<?=$point_data['type']?>">
             <input type="hidden" name="geo-point-id"  id="geo-point-id" value="<?=$point_data['id']?>">
             <input type="hidden" name="geo-point-user-token"  id="geo-point-user-token" value="<?=$token?>">
             <?php
-            if( is_array( $point_data['contentCard']['imageIds'] ) and count( $point_data['contentCard']['imageIds'] ) > 0 ) {
-                foreach ( $point_data['contentCard']['imageIds'] as $image_id ) { ?>
-                    <input type="hidden" name="geo-point-images" class="geo-point-images"  value="<?=$image_id ?>">
-                <?php } ?>
+            if( isset($point_data['contentCard']) ) {
+                if( is_array( $point_data['contentCard']['imageIds'] ) and count( $point_data['contentCard']['imageIds'] ) > 0 ) {
+                    foreach ( $point_data['contentCard']['imageIds'] as $image_id ) { ?>
+                        <input type="hidden" name="geo-point-images" class="geo-point-images"  value="<?=$image_id ?>">
+                    <?php } ?>
 
-            <?php } ?>
+                <?php }
+            }
+            ?>
 
 
             <?php if( isset($point_data['latitude']) and !empty($point_data['latitude']) and isset($point_data['longitude']) and !empty($point_data['longitude']) ){ ?>
