@@ -2,12 +2,15 @@
 
 namespace app\controllers;
 
+use app\models\AvatarDataModel;
 use app\models\ImageDataModel;
 use app\models\PointDataModel;
 use app\models\TopicDataModel;
 use app\models\UserDataModel;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -113,7 +116,7 @@ class PointController extends MainController
 
     }
 
-    public function actionView()
+    public function actionView($id = false )
     {
 
         $pointModel = new PointDataModel();
@@ -122,66 +125,51 @@ class PointController extends MainController
         $userDataModel = new UserDataModel();
         $usersArray = $userDataModel->getUsersArray();
 
+
+
+
+
         if( $allGeoPoints['status']  === true  and $usersArray['status'] === true ){
+
+            $users_array_data = ArrayHelper::map($usersArray['data'], 'id', 'token');
+
+            $user_profile_data = false;
+
+            if( isset( $users_array_data[ $id ] ) ){
+
+                $user_token = $users_array_data[$id ];
+                $user_profile = $userDataModel->getUserProfile( $id, $user_token );
+
+                if ($user_profile['status'] == true) {
+
+                    $user_profile_data = $user_profile['data'];
+                    $user_profile_data['token'] = $user_token;
+
+                    if (isset( $user_profile_data['avatarId'] ) and !empty( $user_profile_data['avatarId'] ) ) {
+                        $avatar_model = new AvatarDataModel();
+                        $avatar = $avatar_model->getAvatar( $user_profile_data['avatarId'], $user_token);
+                        if ($avatar['status'] == true) {
+                            $user_profile_data['avatarBase64'] = 'data:image/jpeg;base64,' . base64_encode($avatar['data']);
+                        }
+
+                    }
+                }
+            }
+
+
              return $this->render('view',[
                 'points' => $allGeoPoints['data'],
                 'users' => $usersArray['data'],
-               //'images' => $images,
+                'user_data' => $user_profile_data,
+
 
               // 'current_user_id' => $current_user,
            ]);
-        }
-
-
-       /* $post_id = Yii::$app->getRequest()->getQueryParam('id');
-        if( $post_id ){
-            $current_user = $post_id;
         }else{
-            $current_user = false;
+            throw new BadRequestHttpException('No user data');
         }
-        $token = Datausers::find()
-            ->select('token')
-            ->asArray()
-            ->where(['not',['token'=>null]])
-            ->one();
-
-        $users = Datausers::find()
-            ->select('profile_id, phone')
-            ->asArray()
-            ->all();
 
 
-        $images = false;
-        $all_events = false;*/
-
-        /*if( $token["token"] ){
-            $UserDataModel = new UserModel();
-            $all_events = $UserDataModel->getAllEvents( $token["token"] );
-
-            $image_data = $UserDataModel->getImage(5, $token['token'] );
-            if( $image_data ){
-                $images[] = $image_data;
-            }
-            if( $all_events ){
-                $all_events = json_decode($all_events, true);
-            }
-        }*/
-
-       /* return $this->render('event_list',[
-            'events' => $all_events,
-            //'images' => $images,
-           // 'users' => $users,
-           // 'current_user_id' => $current_user,
-        ]);*/
-
-        /*$user_id = Yii::$app->getRequest()->getQueryParam('id');
-        $userDataModel = new UserDataModel();
-        $usersArray = $userDataModel->getUsersArray();
-
-        return $this->render('view',[
-            'current_user_id' => $user_id,
-            'all_users' => $usersArray,
-        ]);*/
 
 
     }
@@ -223,6 +211,78 @@ class PointController extends MainController
             ]);
         }
 
+
+    }
+
+
+    public function actionProfile(  )
+    {
+
+
+
+        $token = Yii::$app->getRequest()->getQueryParam('id');
+        $userDataModel = new UserDataModel();
+
+
+        $usersArray = $userDataModel->getUsersArray();
+
+        $base64_avatar = false;
+        $array_data = false;
+
+
+
+        if( $usersArray['status'] === true ) {
+
+            $map_users = ArrayHelper::map($usersArray['data'], 'token', 'id');
+
+
+            if ($token) {
+
+                if (is_array($map_users) and isset($map_users[$token])) {
+
+                    $current_user_data = $userDataModel->getUserProfile($map_users[$token], $token);
+
+                    if ($current_user_data['status'] == true) {
+
+                        $array_data = $current_user_data['data'];
+                        $array_data['token'] = $token;
+
+                        if (isset($array_data['avatarId']) and !empty($array_data['avatarId'])) {
+                            $avatar_model = new AvatarDataModel();
+                            $avatar = $avatar_model->getAvatar($array_data['avatarId'], $token);
+
+                            if ($avatar['status'] == true) {
+                                $base64_avatar = 'data:image/jpeg;base64,' . base64_encode($avatar['data']);
+                            }
+
+                        }
+                    }
+
+                }
+
+            }
+
+            $topic_model = new TopicDataModel();
+            $topic_data = false;
+
+            if (isset($usersArray['data'][0]["token"])) {
+                $topic = $topic_model->getTopics($usersArray['data'][0]["token"]);
+                if ($topic['status'] == true) {
+                    $topic_data = json_decode($topic['data'], true);
+                }
+            }
+
+
+            return $this->render('profile', [
+                'current_user_id' => $token,
+                'current_user_data' => $array_data,
+                'current_user_avatar' => $base64_avatar,
+                'topic' => $topic_data,
+                'all_users' => $usersArray['data'],
+            ]);
+
+
+        }
 
     }
 
@@ -307,6 +367,8 @@ class PointController extends MainController
     }
 
 
+
+    // TO DO  Delete after
     public function actionView_event_item(){
 
         $event_data = false;
@@ -369,6 +431,8 @@ class PointController extends MainController
 
     }
 
+
+    // TO DO  Delete after
     public function actionEvent_list()
     {
 
@@ -416,6 +480,8 @@ class PointController extends MainController
 
     }
 
+
+    // TO DO  Delete after
     public function actionEvent_add()
     {
 

@@ -4,7 +4,7 @@
 
 use yii\helpers\Html;
 
-$this->title = 'Event list';
+$this->title = 'Geo points';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -14,42 +14,133 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 <div class="content-window-inner">
 
-
-
-
     <?php
-    /*if( $current_user_id ){
-        if( $events ) {
-
-            foreach ($events as $key_event => $event) {
-                if ($event['ownerId'] != $current_user_id) {
-                    unset($events[$key_event]);
-                }
-            }
-
-        }
-        */?><!--
-        <div class="alert alert-success" role="alert" >
-            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-            <span class="sr-only">Success:</span>
-            Event for user: <?/*=$current_user_id*/?>; Event count:  <span class="badge"><?/*=count($events)*/?></span> &nbsp;&nbsp;&nbsp; <a class="btn-sm btn-info " href="/event/list">Show all events</a>
-        </div>
-        --><?php
-/*    }*/
-
 
     $user_list = array();
     if( $users ){
-        foreach ($users as $user ) {
-            $user_list[ $user['id'] ] = array(
-                'phone' => $user['phoneNumber'],
-                'token' => $user['token'],
-            );
+        if( is_array($points) ){
+
+            $point_owners = \yii\helpers\ArrayHelper::map($points, 'ownerId', 'id');
+
+            foreach ($users as $user ) {
+
+                if( isset($point_owners[$user['id']]) and !empty($point_owners[$user['id']]) ){
+                    $user_list[ $user['id'] ] = array(
+                        'id' => $user['id'],
+                        'phoneNumber' => $user['phoneNumber'],
+                        'token' => $user['token'],
+                    );
+
+                }
+            }
         }
+
     }
 
 
+
     ?>
+
+    <?php if ( is_array($user_list) ){ ?>
+
+        <form class="navbar-form" action="/point/view" method="get">
+            <div class="form-group">
+                <select name="id" class="user-select form-control">
+                    <option selected=selected  value="">
+                        No user selected
+                    </option>
+                    <?php foreach ($user_list as $user) { ?>
+
+                        <option <?= ($user['id'] == $_GET['id']) ? 'selected=selected' : ''; ?> value="<?= $user['id'] ?>">
+                            <?= $user['phoneNumber'] ?>
+                        </option>
+
+                    <?php } ?>
+                </select>
+                <button type="submit" class="btn btn-sm btn-success ">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    <span class="hidden-xs hidden-sm">Select user</span>
+                </button>
+            </div>
+        </form>
+
+    <?php } ?>
+
+
+    <?php
+    if ( is_array($user_data) ) {
+
+        foreach( $points as $key => $point ) {
+            if( $point['ownerId'] !== $user_data['id'] ){
+                unset( $points[$key] );
+            }else{
+                $array_point_by_type[$point['type']][] = [
+                    'id' => $point['id'],
+                    'ownerId' => $point['ownerId'],
+                    'latitude' => $point['latitude'],
+                    'longitude' => $point['longitude'],
+                ];
+            }
+        }
+        ?>
+
+        <div class="profile-block">
+
+            <div class="profile-block-col-first">
+                <div class="profile-block-info-name">
+
+                    <?= isset($user_data['fullName']) ? $user_data['fullName'] : 'empty' ?>
+                </div>
+                <div class="profile-block-avatar">
+                    <?php if ( isset($user_data['avatarBase64'] ) and !empty($user_data['avatarBase64'])  ) {?>
+                        <img src="<?= $user_data['avatarBase64']  ?>" alt="">
+                    <?php }else{ ?>
+                        <img src="/web/img/placeholder-user.png" alt="">
+                    <?php } ?>
+                </div>
+            </div>
+            <div class="profile-block-col-last">
+                <div class="profile-block-info">
+                    <div class="profile-block-info-head">
+
+                        <div class="profile-block-info-place">
+                            <div class="profile-block-info-city">
+                                <span class="glyphicon glyphicon-map-marker"></span> <?= isset($user_data['city']) ? $user_data['city'] : 'empty' ?>
+                            </div>
+                            <div class="profile-block-info-locale">
+                                <span class="label label-default"><?= isset($user_data['locale']) ? $user_data['locale'] : 'empty' ?></span>
+                            </div>
+                            <div class="btn-group" style="margin-left: auto;">
+                                <a href="/point/profile?id=<?=$user_data['token']?>" type="button"  class="btn  btn-sm btn-success" aria-label="Left Align"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Add geo profile</span></a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="profile-block-info-phone">
+                        <span class="glyphicon glyphicon-earphone"></span><?= isset($user_data['phoneNumber']) ? $user_data['phoneNumber'] : 'empty' ?>
+                    </div>
+                </div>
+
+
+                <div class="profile-geo-points">
+
+
+                    <?= $this->render('geo-points.php',[
+                        'array_point_by_type' => $array_point_by_type,
+                        'token' => $user_data['token'],
+                    ]) ?>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    <?php }else{ ?>
+
 
 
     <table class="table"   >
@@ -59,9 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <th class="hidden-xs hidden-sm">
                 Geo Point Id
             </th>
-            <th>
-                user
-            </th>
+
             <th class="hidden-xs hidden-sm" >
                 latitude
             </th>
@@ -80,9 +169,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if( isset($points)  ){ ?>
 
-          <!--  <pre>
-                <?php /*print_r($users);*/?>
-            </pre>-->
 
             <?php
 
@@ -94,9 +180,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 <tr>
                     <td class="hidden-xs hidden-sm">
                         <?= ($point['id']) ? $point['id'] : 'NULL'?>
-                    </td>
-                    <td>
-                        <?= ( isset( $user_list[$point['ownerId']]) ) ? $user_list[$point['ownerId']]['phone'] : $point['ownerId'] ?>
                     </td>
                     <td class="hidden-xs hidden-sm">
                         <?= ($point['latitude']) ? $point['latitude'] : 'NULL'?>
@@ -124,6 +207,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </tbody>
     </table>
 
+    <?php } ?>
 
 </div>
 

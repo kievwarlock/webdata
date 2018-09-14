@@ -866,15 +866,156 @@ table tr td {
 }
 
 
-
+.profile-geo-points {
+    margin: 20px 0px;
+}
 
 
 table.dataTable {
     width: 100% !important;
 }
 
+.profile-block {padding: 5px 0px 20px 0px;margin: 20px 0px;border-bottom: 2px solid #ccc;box-shadow: 1px 1px 3px 2px #ccc;border-radius: 5px;display: flex;}
+.profile-block-avatar {}
+.profile-block-avatar img {max-width: 100%;border: 3px solid #f9f9f9;border-radius: 10px;box-shadow: 2px 2px 7px 1px #ccc;}
+.profile-block-info {font-size: 11px;text-transform: uppercase;color: #3b3b3b;font-weight: 500;}
+.profile-block-info-name {font-size: 16px;text-transform: uppercase;padding: 7px;color: #3b3b3b;font-weight: 500;text-align: right;}
+.profile-block-info-phone {padding: 5px;font-size: 12px;}
+.profile-block-info-city {padding: 5px;display: flex;font-size: 14px;align-items: center;}
+.profile-block-info-locale {
+    /* padding: 5px; */
+    display: flex;
+}
+.profile-block-info-place {display: flex;align-items: center;/* margin-left: 50px; */}
+.profile-block-info-phone span {font-size: 16px;vertical-align: middle;padding: 5px;}
+.profile-block-info-city span {font-size: 20px;display: inline-block;vertical-align: middle;padding: 3px;color: #5cb85c;}
+.profile-block-info-locale span {
+
+}
+.profile-block-info-head {
+    color: #3b3b3b;
+    border-bottom: 1px solid #e3e7ea;
+}
+
+.profile-block-col-first {
+    max-width: 300px;
+    padding: 0px 20px;
+    width: 100%;
+}
+
+.profile-block-col-last {
+    padding: 0px 20px;
+    width: 100%;
+}
+
+.custom-tab-style {}
+.group-account-block {
+    margin-bottom:40px;
+}
+.custom-tab-style .nav.nav-tabs {
+    border: none;
+    min-height: 40px;
+}
+
+.custom-tab-style .nav.nav-tabs li {
+    border: none;
+    float: inherit;
+    display: inline-block;
+    vertical-align: bottom;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.custom-tab-style .nav.nav-tabs li.active {
+}
+
+.custom-tab-style .nav.nav-tabs li.active a {
+    background: #fff;
+    z-index: 10;
+    padding: 10px 15px;
+}
+
+.custom-tab-style .nav.nav-tabs li a {
+    color: #0c2733;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px 10px 0px 0px;
+    background: #eef0f1;
+    box-shadow: 4px -1px 10px 1px #6b6b6b47;
+    padding: 7px 15px;
+    margin-right: 0px;
+
+    display: flex;
+    align-items: center;
+}
+
+.group-account-tab-nav {
+    padding: 10px;
+    background: #fff;
+    position: relative;
+    z-index: 10;
+}
+
+.group-account-tab-nav-btn {
+    margin: 5px;
+}
+
+.custom-tab-style .tab-content {
+    background: #ffffff;
+    box-shadow: 1px 1px 2px 0px #ccc;
+    padding: 15px;
+    position: relative;
+    z-index: 10;
+}
+
+.custom-tab-style .tab-pane {
+
+}
+.custom-tab-style .table {
+
+    border-top: 1px solid #eef0f1;
+}
+
+.custom-tab-style .table thead {
+    font-size: 14px;
+    font-weight: bold;
+    color:#222;
+}
+.custom-tab-style .table tbody {
+    font-size: 12px;
+    font-weight: normal;
+    color: #808080;
+}
 
 
+.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+
+    padding: 8px 6px;
+
+    line-height: 1.2;
+
+    border-top: none;
+
+    font-size: 12px;
+
+    color: #808080;
+
+    border-right: 1px solid #eef0f1;
+}
+.table > thead > tr > th {
+
+    font-size: 14px;
+
+    color: #232323;
+
+    vertical-align: middle;
+
+    padding: 8px 8px;
+
+    border-bottom: none;
+}
 
 
 

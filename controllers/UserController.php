@@ -137,7 +137,11 @@ class UserController extends MainController
                     if( isset($user_data['data']["avatarId"]) and !empty($user_data['data']["avatarId"]) ) {
                         $model = new AvatarDataModel();
 
-                        $avatar_base64 = $model->getAvatar($user_data['data']["avatarId"], $data['user_token'], 'original' );
+                        $avatar = $model->getAvatar($user_data['data']["avatarId"], $data['user_token'], 'original' );
+
+                        if( $avatar['status'] == true ){
+                            $avatar_base64 = 'data:image/jpeg;base64,' . base64_encode($avatar['data']);
+                        }
 
                     }
 

@@ -14,40 +14,13 @@ class AvatarDataModel extends  ServerModel  {
             return false;
         }
 
-        $curl = curl_init();
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            '/avatar/'  . $size . '/' . $image_id,
+            $token
+        );
 
-        curl_setopt_array($curl, array(
-
-            CURLOPT_URL => $this->SERVER_PUBLIC_ADRESS . "/avatar/" . $size . "/" . $image_id,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => array(
-                "X-Auth-Token:" . $token
-            ),
-        ));
-
-
-
-        $response = curl_exec($curl);
-        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $err = curl_error($curl);
-
-        curl_close($curl);
-
-
-        if ($err) {
-            //echo "cURL Error #:" . $err;
-            return false;
-        } else {
-            if( $httpcode == 200 ){
-                $base64 = 'data:image/jpeg;base64,' . base64_encode($response);
-                return $base64;
-            }else{
-                return $response . ' CODE:' . $httpcode;
-            }
-
-        }
-
+        return $return_data;
 
     }
 

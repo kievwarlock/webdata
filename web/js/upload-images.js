@@ -1,216 +1,588 @@
-$(function () {
+var currentUserId = $('.point-user-id').val();
+var currentUserToken = $('.point-user-token').val();
 
-    'use strict';
 
+function ImageUpload() {
 
-    var currentUserId = $('.point-user-id').val();
-    var currentUserToken = $('.point-user-token').val();
-
-    function ImageUpload() {
-
-        this.mainSelector = '.upload-images-block';
-        this.itemSelector =  '.upload-images-item';
-        this.itemTemplate = '.upload-images-item-template';
-        this.item = '<div class="upload-images-item">' + $(this.itemTemplate).html() + '</div>';
-        this.minImageCount = 1;
-        this.maxImageCount = 5;
-        this.imageType = 'image/jpeg';
+    this.mainSelector = '.upload-images-block';
+    this.itemSelector =  '.upload-images-item';
+    this.itemTemplate = '.upload-images-item-template';
+    this.item = '<div class="upload-images-item">' + $(this.itemTemplate).html() + '</div>';
+    this.minImageCount = 1;
+    this.maxImageCount = 5;
+    this.imageType = 'image/jpeg';
 
 
 
 
-        this.add = function(){
-            if( $(this.itemSelector).length >= this.maxImageCount ){
-                alert( 'Max image count - ' + this.maxImageCount );
-                return false;
-            }
-            $(this.mainSelector).append( '<div class="upload-images-item">' + $(this.itemTemplate).html() + '</div>' );
-        };
+    this.add = function(){
+        if( $(this.itemSelector).length >= this.maxImageCount ){
+            alert( 'Max image count - ' + this.maxImageCount );
+            return false;
+        }
+        $(this.mainSelector).append( '<div class="upload-images-item">' + $(this.itemTemplate).html() + '</div>' );
+    };
 
-        this.clear = function (event) {
-            $(event.target).parents(this.itemSelector).find('.upload-images-item-crop.croppie-container').croppie( 'destroy' );
-        };
+    this.clear = function (event) {
+        $(event.target).parents(this.itemSelector).find('.upload-images-item-crop.croppie-container').croppie( 'destroy' );
+    };
 
-        this.clearAll = function () {
-            $('.upload-images-item-crop.croppie-container').each( function () {
-                $(this).croppie( 'destroy' );
+    this.clearAll = function () {
+        $('.upload-images-item-crop.croppie-container').each( function () {
+            $(this).croppie( 'destroy' );
+        });
+    };
+
+    this.rotate = function (event) {
+        $(event.target).parents(this.itemSelector).find('.upload-images-item-crop').croppie( 'rotate', 90 );
+    };
+
+    this.remove = function(event){
+
+        if( $(this.itemSelector).length <= this.minImageCount ){
+            alert( 'Min image count - ' + this.minImageCount );
+            return false;
+        }
+        $(event.target).parents(this.itemSelector).remove();
+    };
+
+    this.view = function ( item ) {
+
+        if( item.length > 0 ){
+            item.croppie('result',{
+                    type:'base64',
+                    size:{width:1024, height:1024 }
+                }
+            ).then(function(result) {
+                $('.upload-image-preview img').attr('src', result );
+                $('.upload-image-preview-modal').modal('show');
             });
-        };
+        }
 
-        this.rotate = function (event) {
-            $(event.target).parents(this.itemSelector).find('.upload-images-item-crop').croppie( 'rotate', 90 );
-        };
+    };
 
-        this.remove = function(event){
+    this.sendImages = function (data, userToken, type, formData ) {
 
-            if( $(this.itemSelector).length <= this.minImageCount ){
-                alert( 'Min image count - ' + this.minImageCount );
-                return false;
-            }
-            $(event.target).parents(this.itemSelector).remove();
-        };
+        var resultArray = '';
+        var countUpload = data.length;
 
-        this.view = function ( item ) {
-
-            if( item.length > 0 ){
-                item.croppie('result',{
-                        type:'base64',
-                        size:{width:1024, height:1024 }
-                    }
-                ).then(function(result) {
-                    $('.upload-image-preview img').attr('src', result );
-                    $('.upload-image-preview-modal').modal('show');
-                });
-            }
-
-        };
-
-        this.sendImages = function (data, userToken, type, formData ) {
-
-            var resultArray = '';
-            var countUpload = data.length;
-
-            for( var imageData of data ){
+        for( var imageData of data ){
 
 
-                if( imageData.blob  ) {
+            if( imageData.blob  ) {
 
 
-                    var form = new FormData();
-                    form.append('image', imageData.blob);
-                    form.append('token', userToken);
+                var form = new FormData();
+                form.append('image', imageData.blob);
+                form.append('token', userToken);
 
 
 
-                    $.ajax({
-                        url: '/image/create/',
-                        type: 'POST',
-                        data: form,
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        success: function (res) {
+                $.ajax({
+                    url: '/image/create/',
+                    type: 'POST',
+                    data: form,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
 
 
-                            try {
+                        try {
 
-                                if (res) {
+                            if (res) {
 
-                                    // TODO must check image request from API
-                                    addPushNotification('success', 'Image uploaded. Image id:' + res ,3000 );
-                                    countUpload = parseInt(countUpload) - 1;
-                                    resultArray += res + ',';
+                                // TODO must check image request from API
+                                addPushNotification('success', 'Image uploaded. Image id:' + res ,3000 );
+                                countUpload = parseInt(countUpload) - 1;
+                                resultArray += res + ',';
 
-                                    if (countUpload == 0) {
-                                        addPushNotification('success', 'All images was uploaded successful!' ,3000 );
-                                        formData.images = resultArray;
-                                        createEvent(userToken, type, formData);
-                                    }
-                                }else{
-
-
-
-                                    endLoader();
-                                    addPushNotification('error', 'Error image upload' , 2000 );
-
-
+                                if (countUpload == 0) {
+                                    addPushNotification('success', 'All images was uploaded successful!' ,3000 );
+                                    formData.images = resultArray;
+                                    createEvent(userToken, type, formData);
                                 }
+                            }else{
 
-                            } catch (e) {
+
+
                                 endLoader();
-                                addPushNotification('error', 'Error' . e , 2000 );
+                                addPushNotification('error', 'Error image upload' , 2000 );
+
 
                             }
-                        },
-                        error: function () {
+
+                        } catch (e) {
                             endLoader();
-                            addPushNotification('error', 'Error' . e, 2000 );
+                            addPushNotification('error', 'Error' . e , 2000 );
+
                         }
-                    });
-
-                }
-
-            }
-
-
-        };
-
-
-
-        this.uploadImages = function ( userToken, type, formData  ) {
-
-            var Images = [];
-            var countImages = $('.upload-images-item-crop.croppie-container').length;
-            var classThis = this;
-            $(this.itemSelector).each( function () {
-
-                 let croppieItem = $(this).find('.upload-images-item-crop.croppie-container');
-                 let currentItem = $(this);
-                 if (croppieItem.length > 0) {
-                     croppieItem.croppie('result', {
-                         type: 'blob',
-                         size: {width: 1024, height: 1024},
-                         format:'jpeg',
-                     }).then( function ( result ) {
-
-                         Images.push({
-                             item:currentItem,
-                             blob:result,
-                         });
-
-                         if( Images.length == countImages ){
-                             classThis.sendImages( Images, userToken, type, formData );
-                         }
-
-                     });
-                 }
-
-            });
-
-        };
-
-        this.upload =  function ( file, initItem ) {
-
-            if( file.target.files[0] && initItem){
-
-                if( file.target.files[0].type != this.imageType ) {
-                    $(file.target).val('');
-                    addPushNotification('error', 'Image format - ' + this.imageType, 3500 );
-
-                    return false;
-                }
-
-                var reader  = new FileReader();
-                reader.onload = function () {
-                    initItem.croppie('destroy');
-                    initItem.croppie({
-                        enableOrientation:true,
-                        enableExif: true,
-                        viewport: {
-                            width: 300,
-                            height: 300,
-                        },
-                        boundary: {
-                            width: 300,
-                            height: 300
-                        },
-                        url:reader.result
-                    });
-
-                };
-
-                reader.readAsDataURL(file.target.files[0]);
+                    },
+                    error: function () {
+                        endLoader();
+                        addPushNotification('error', 'Error' . e, 2000 );
+                    }
+                });
 
             }
 
+        }
 
-        };
 
     };
 
 
 
-    var uploadImage = new ImageUpload();
+    this.uploadImages = function ( userToken, type, formData  ) {
+
+        var Images = [];
+        var countImages = $('.upload-images-item-crop.croppie-container').length;
+        var classThis = this;
+        $(this.itemSelector).each( function () {
+
+            let croppieItem = $(this).find('.upload-images-item-crop.croppie-container');
+            let currentItem = $(this);
+            if (croppieItem.length > 0) {
+                croppieItem.croppie('result', {
+                    type: 'blob',
+                    size: {width: 1024, height: 1024},
+                    format:'jpeg',
+                }).then( function ( result ) {
+
+                    Images.push({
+                        item:currentItem,
+                        blob:result,
+                    });
+
+                    if( Images.length == countImages ){
+                        classThis.sendImages( Images, userToken, type, formData );
+                    }
+
+                });
+            }
+
+        });
+
+    };
+
+    this.upload =  function ( file, initItem ) {
+
+        if( file.target.files[0] && initItem){
+
+            if( file.target.files[0].type != this.imageType ) {
+                $(file.target).val('');
+                addPushNotification('error', 'Image format - ' + this.imageType, 3500 );
+
+                return false;
+            }
+
+            var reader  = new FileReader();
+            reader.onload = function () {
+                initItem.croppie('destroy');
+                initItem.croppie({
+                    enableOrientation:true,
+                    enableExif: true,
+                    viewport: {
+                        width: 300,
+                        height: 300,
+                    },
+                    boundary: {
+                        width: 300,
+                        height: 300
+                    },
+                    url:reader.result
+                });
+
+            };
+
+            reader.readAsDataURL(file.target.files[0]);
+
+        }
+
+
+    };
+
+};
+
+// Main form validation
+function validationForm( type ){
+
+    let validResult = {
+        'valid': true,
+        'empty':[],
+        'error_message':'',
+        'formData':[]
+    };
+
+
+    let lat = $('.form-item-block-map input[name="lat"]').val();
+    let lng = $('.form-item-block-map input[name="lng"]').val();
+    //let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').val() + ' GMT');
+
+    let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').datetimepicker('getDate') );
+
+
+
+    var images = false;
+    if( $('.upload-images-item .upload-images-item-crop.croppie-container').length >= 1){
+        images = true;
+    }
+
+
+    var tags = false;
+    if( $("#geo-tags").length > 0 ){
+        tags = $("#geo-tags").select2("data");
+    }
+
+
+    let description = $('.form-item-block-description textarea[name="description"]').val();
+    //let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').val() + ' GMT');
+    //let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').val() + ' GMT');
+
+    let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').datetimepicker('getDate') );
+    let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').datetimepicker('getDate') );
+
+
+    switch(type){
+
+        case 'PROFILE':
+
+
+            if( lat.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('lat');
+                validResult.error_message += "<li>Lat is empty!</li>";
+            }else{
+                validResult.formData.lat= lat;
+            }
+            if( lng.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('lng');
+                validResult.error_message += "<li>lng is empty!</li>";
+            }else{
+                validResult.formData.lng= lng;
+            }
+
+            if( lastVisit.length == 0 || isNaN(lastVisit) === true ){
+                validResult.valid = false;
+                validResult.empty.push('lastVisit');
+                validResult.error_message += "<li>last visit is empty!</li>";
+            }else{
+                validResult.formData.lastVisit= lastVisit;
+            }
+
+
+            break;
+
+        case 'WAS_HERE':
+
+
+            if( lat.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('lat');
+                validResult.error_message += "<li>last visit is empty!</li>";
+            }else{
+                validResult.formData.lat= lat;
+            }
+
+
+
+
+            if( lng.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('lng');
+                validResult.error_message += "<li>lng is empty!</li>";
+            }else{
+                validResult.formData.lng= lng;
+            }
+
+            if( description.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('description');
+                validResult.error_message += "<li>description is empty!</li>";
+            }else{
+                validResult.formData.description= description;
+            }
+
+            if( images == false ){
+                validResult.valid = false;
+                validResult.empty.push('images');
+                validResult.error_message += "<li>images is empty!</li>";
+            }
+
+            if( tags == false ){
+                validResult.valid = false;
+                validResult.empty.push('tags');
+                validResult.error_message += "<li>Tags is empty!</li>";
+            }else{
+                validResult.formData.tags= tags;
+            }
+
+
+            break;
+
+        case 'WILL_BE_HERE':
+
+
+            if( lat.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('lat');
+                validResult.error_message += '<li>lat is empty!</li>';
+            }else{
+                validResult.formData.lat= lat;
+            }
+
+            if( lng.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('lng');
+                validResult.error_message += '<li>lng is empty!</li>';
+            }else{
+                validResult.formData.lng= lng;
+            }
+
+            if( description.length == 0 ){
+                validResult.valid = false;
+                validResult.empty.push('description');
+                validResult.error_message += '<li>description is empty!</li>';
+            }else{
+                validResult.formData.description= description;
+            }
+
+            if( images == false ){
+                validResult.valid = false;
+                validResult.empty.push('images');
+                validResult.error_message += '<li>images is empty!</li>';
+            }
+
+            if( startTime.length == 0 || isNaN(startTime) === true ){
+                validResult.valid = false;
+                validResult.empty.push('startTime');
+                validResult.error_message += '<li>start Time is empty!</li>';
+            }else{
+                validResult.formData.startTime= startTime;
+            }
+
+            if( finishTime.length == 0 || isNaN(finishTime) === true ){
+                validResult.valid = false;
+                validResult.empty.push('finishTime');
+                validResult.error_message += '<li>finish Time is empty!</li>';
+            }else{
+                validResult.formData.finishTime= finishTime;
+            }
+
+
+            if( tags == false ){
+                validResult.valid = false;
+                validResult.empty.push('tags');
+                validResult.error_message += "<li>Tags is empty!</li>";
+            }else{
+                validResult.formData.tags= tags;
+            }
+
+
+            break;
+
+        default:
+
+            break;
+    }
+
+    return validResult;
+
+
+}
+
+// Clear form fiels
+function clearFormData(){
+    uploadImage.clearAll();
+    $('.upload-images-item').removeClass('success');
+
+    $('.uploadImageForm input').val('');
+    $('.uploadImageForm textarea').val('');
+}
+
+// Create event
+function createEvent( userToken, type, formData ){
+
+
+    try {
+
+        var data = new FormData();
+        data.append('type', type);
+        data.append('token', userToken);
+
+
+        // TODO remove when ownerId not need
+        if( currentUserId.length <= 0){
+            alert('currentUserId not found!');
+            return false;
+        }
+        data.append('id', currentUserId);
+
+        for (var prop in formData) {
+
+            if( prop == "tags" ){
+                for (var tags in formData[prop]) {
+                    data.append( 'tags[]', formData[prop][tags]['id'] );
+                }
+            }else{
+                data.append( prop, formData[prop]);
+            }
+
+        }
+
+
+        $.ajax({
+            url: '/point/create/',
+            type: 'POST',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+
+                endLoader();
+
+                if (res) {
+                    try {
+
+                        let jsonEvent = JSON.parse(res);
+                        if( jsonEvent.id ){
+                            addPushNotification('success', 'New geo point was created successful!' );
+                            clearFormData();
+                        }else{
+                            throw new SyntaxError("Ошибка в данных json");
+                        }
+
+                    } catch (error) {
+                        addPushNotification('error', 'Error:' + error, 4000 );
+                    }
+
+
+                }else{
+                    throw new SyntaxError("Ошибка в данных ответа!");
+                }
+
+
+            },
+            error: function () {
+                endLoader();
+                addPushNotification('error', 'Error ajax!', 4000 );
+            }
+        });
+
+
+    } catch (e) {
+        endLoader();
+        addPushNotification('error', 'Error: code' + e, 4000 );
+    }
+
+
+
+}
+
+// Update geo point
+function updateGeoPoint( idPoint, userToken, type, formData ){
+
+
+    var data = new FormData();
+    data.append('id', idPoint);
+    data.append('type', type);
+    data.append('token', userToken);
+
+    if( $('.geo-point-images').length > 0 ){
+        $('.geo-point-images').each(function (e) {
+            data.append('imageIds[]', $(this).val() );
+        })
+    }
+
+    for (var prop in formData) {
+        if( prop == "tags" ){
+            for (var tags in formData[prop]) {
+                data.append( 'tags[]', formData[prop][tags]['id'] );
+            }
+        }else{
+            data.append( prop, formData[prop]);
+        }
+    }
+
+
+    try {
+
+        startLoader();
+
+        $.ajax({
+            url: '/point/update/',
+            type: 'POST',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (result) {
+
+                endLoader();
+
+                if (result) {
+
+                    try {
+
+                        var resultData =  JSON.parse(result);
+
+                        if (!resultData['point_status'] || !resultData['content_status'] ) {
+                            throw new SyntaxError("Ошибка в данных ответа!");
+                        }
+
+                        if( resultData['point_status'] == true ){
+                            addPushNotification('success', resultData['point_msg'],4000 );
+                        }else{
+                            addPushNotification('error', resultData['point_msg'],4000 );
+                        }
+
+                        if( resultData['content_status'] == true ){
+                            addPushNotification('success', resultData['content_msg'],4000 );
+                        }else{
+                            addPushNotification('error', resultData['content_msg'],4000 );
+                        }
+
+                    } catch ( error ) {
+                        addPushNotification('error', 'Code error:' + error,4000 );
+                    }
+
+
+                }
+
+
+            },
+            error: function () {
+                endLoader();
+                addPushNotification('error', 'Code error:' + error,4000 );
+            }
+
+        });
+
+
+    } catch (e) {
+        endLoader();
+        addPushNotification('error', 'Code error:' + error,4000 );
+    }
+
+
+}
+
+
+var uploadImage = new ImageUpload();
+
+
+$(function () {
+
+    'use strict';
+
+
+
+
+
+
+
 
     // Init all image control event
     $('body').on('click','.upload-images-action-remove', function (e) {
@@ -240,202 +612,6 @@ $(function () {
 
 
 
-    // Main form validation
-    function validationForm( type ){
-
-        let validResult = {
-            'valid': true,
-            'empty':[],
-            'error_message':'',
-            'formData':[]
-        };
-
-
-        let lat = $('.form-item-block-map input[name="lat"]').val();
-        let lng = $('.form-item-block-map input[name="lng"]').val();
-        //let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').val() + ' GMT');
-
-        let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').datetimepicker('getDate') );
-
-
-
-        var images = false;
-        if( $('.upload-images-item .upload-images-item-crop.croppie-container').length >= 1){
-            images = true;
-        }
-
-
-        var tags = false;
-        if( $("#geo-tags").length > 0 ){
-            tags = $("#geo-tags").select2("data");
-        }
-
-
-        let description = $('.form-item-block-description textarea[name="description"]').val();
-        //let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').val() + ' GMT');
-        //let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').val() + ' GMT');
-
-        let startTime = Date.parse( $('.form-item-block-start-time input[name="start-time"]').datetimepicker('getDate') );
-        let finishTime = Date.parse( $('.form-item-block-finish-time input[name="finish-time"]').datetimepicker('getDate') );
-
-
-        switch(type){
-
-            case 'PROFILE':
-
-
-                if( lat.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('lat');
-                    validResult.error_message += "<li>Lat is empty!</li>";
-                }else{
-                    validResult.formData.lat= lat;
-                }
-                if( lng.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('lng');
-                    validResult.error_message += "<li>lng is empty!</li>";
-                }else{
-                    validResult.formData.lng= lng;
-                }
-
-                if( lastVisit.length == 0 || isNaN(lastVisit) === true ){
-                    validResult.valid = false;
-                    validResult.empty.push('lastVisit');
-                    validResult.error_message += "<li>last visit is empty!</li>";
-                }else{
-                    validResult.formData.lastVisit= lastVisit;
-                }
-
-
-                break;
-
-            case 'WAS_HERE':
-
-
-                if( lat.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('lat');
-                    validResult.error_message += "<li>last visit is empty!</li>";
-                }else{
-                    validResult.formData.lat= lat;
-                }
-
-
-
-
-                if( lng.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('lng');
-                    validResult.error_message += "<li>lng is empty!</li>";
-                }else{
-                    validResult.formData.lng= lng;
-                }
-
-                if( description.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('description');
-                    validResult.error_message += "<li>description is empty!</li>";
-                }else{
-                    validResult.formData.description= description;
-                }
-
-                if( images == false ){
-                    validResult.valid = false;
-                    validResult.empty.push('images');
-                    validResult.error_message += "<li>images is empty!</li>";
-                }
-
-                if( tags == false ){
-                    validResult.valid = false;
-                    validResult.empty.push('tags');
-                    validResult.error_message += "<li>Tags is empty!</li>";
-                }else{
-                    validResult.formData.tags= tags;
-                }
-
-
-                break;
-
-            case 'WILL_BE_HERE':
-
-
-                if( lat.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('lat');
-                    validResult.error_message += '<li>lat is empty!</li>';
-                }else{
-                    validResult.formData.lat= lat;
-                }
-
-                if( lng.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('lng');
-                    validResult.error_message += '<li>lng is empty!</li>';
-                }else{
-                    validResult.formData.lng= lng;
-                }
-
-                if( description.length == 0 ){
-                    validResult.valid = false;
-                    validResult.empty.push('description');
-                    validResult.error_message += '<li>description is empty!</li>';
-                }else{
-                    validResult.formData.description= description;
-                }
-
-                if( images == false ){
-                    validResult.valid = false;
-                    validResult.empty.push('images');
-                    validResult.error_message += '<li>images is empty!</li>';
-                }
-
-                if( startTime.length == 0 || isNaN(startTime) === true ){
-                    validResult.valid = false;
-                    validResult.empty.push('startTime');
-                    validResult.error_message += '<li>start Time is empty!</li>';
-                }else{
-                    validResult.formData.startTime= startTime;
-                }
-
-                if( finishTime.length == 0 || isNaN(finishTime) === true ){
-                    validResult.valid = false;
-                    validResult.empty.push('finishTime');
-                    validResult.error_message += '<li>finish Time is empty!</li>';
-                }else{
-                    validResult.formData.finishTime= finishTime;
-                }
-
-
-                if( tags == false ){
-                    validResult.valid = false;
-                    validResult.empty.push('tags');
-                    validResult.error_message += "<li>Tags is empty!</li>";
-                }else{
-                    validResult.formData.tags= tags;
-                }
-
-
-                break;
-
-            default:
-
-                break;
-        }
-
-        return validResult;
-
-
-    }
-
-    // Clear form fiels
-    function clearFormData(){
-        uploadImage.clearAll();
-        $('.upload-images-item').removeClass('success');
-
-        $('.uploadImageForm input').val('');
-        $('.uploadImageForm textarea').val('');
-    }
 
     // Change controls by selected TYPE
     $('body').on('change','#type', function () {
@@ -649,179 +825,6 @@ $(function () {
     });
 
 
-
-    // Create event
-    function createEvent( userToken, type, formData ){
-
-
-        try {
-
-            var data = new FormData();
-            data.append('type', type);
-            data.append('token', userToken);
-
-
-            // TODO remove when ownerId not need
-            if( currentUserId.length <= 0){
-                alert('currentUserId not found!');
-                return false;
-            }
-            data.append('id', currentUserId);
-
-            for (var prop in formData) {
-
-                if( prop == "tags" ){
-                    for (var tags in formData[prop]) {
-                        data.append( 'tags[]', formData[prop][tags]['id'] );
-                    }
-                }else{
-                    data.append( prop, formData[prop]);
-                }
-
-            }
-
-
-            $.ajax({
-                url: '/point/create/',
-                type: 'POST',
-                data: data,
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function (res) {
-
-                    endLoader();
-
-                    if (res) {
-                        try {
-
-                            let jsonEvent = JSON.parse(res);
-                            if( jsonEvent.id ){
-                                addPushNotification('success', 'New geo point was created successful!' );
-                                clearFormData();
-                            }else{
-                                throw new SyntaxError("Ошибка в данных json");
-                            }
-
-                        } catch (error) {
-                            addPushNotification('error', 'Error:' + error, 4000 );
-                        }
-
-
-                    }else{
-                        throw new SyntaxError("Ошибка в данных ответа!");
-                    }
-
-
-                },
-                error: function () {
-                    endLoader();
-                    addPushNotification('error', 'Error ajax!', 4000 );
-                }
-            });
-
-
-        } catch (e) {
-            endLoader();
-            addPushNotification('error', 'Error: code' + error, 4000 );
-        }
-
-
-
-    }
-
-
-
-
-
-
-    // Update geo point
-    function updateGeoPoint( idPoint, userToken, type, formData ){
-
-
-        var data = new FormData();
-        data.append('id', idPoint);
-        data.append('type', type);
-        data.append('token', userToken);
-
-        if( $('.geo-point-images').length > 0 ){
-            $('.geo-point-images').each(function (e) {
-                data.append('imageIds[]', $(this).val() );
-            })
-        }
-
-        for (var prop in formData) {
-            if( prop == "tags" ){
-                for (var tags in formData[prop]) {
-                    data.append( 'tags[]', formData[prop][tags]['id'] );
-                }
-            }else{
-                data.append( prop, formData[prop]);
-            }
-        }
-
-
-        try {
-
-            startLoader();
-
-            $.ajax({
-                url: '/point/update/',
-                type: 'POST',
-                data: data,
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function (result) {
-
-                    endLoader();
-
-                    if (result) {
-
-                        try {
-
-                            var resultData =  JSON.parse(result);
-
-                            if (!resultData['point_status'] || !resultData['content_status'] ) {
-                                throw new SyntaxError("Ошибка в данных ответа!");
-                            }
-
-                            if( resultData['point_status'] == true ){
-                                addPushNotification('success', resultData['point_msg'],4000 );
-                            }else{
-                                addPushNotification('error', resultData['point_msg'],4000 );
-                            }
-
-                            if( resultData['content_status'] == true ){
-                                addPushNotification('success', resultData['content_msg'],4000 );
-                            }else{
-                                addPushNotification('error', resultData['content_msg'],4000 );
-                            }
-
-                        } catch ( error ) {
-                            addPushNotification('error', 'Code error:' + error,4000 );
-                        }
-
-
-                    }
-
-
-                },
-                error: function () {
-                    endLoader();
-                    addPushNotification('error', 'Code error:' + error,4000 );
-                }
-
-            });
-
-
-        } catch (e) {
-            endLoader();
-            addPushNotification('error', 'Code error:' + error,4000 );
-        }
-
-
-    }
 
 
 

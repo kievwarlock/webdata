@@ -114,18 +114,21 @@ if( $this->context->module->requestedRoute ==  'point/index' ){
                                 'url' => ['user/index'],
                             ],
                             [
-                                'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Create point</span>',
-                                'url' => ['point/index'],
+                                'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Create profile</span>',
+                                'url' => ['point/profile'],
                             ],
                             [
-                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Event list</span>',
+                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Geo points</span>',
                                 'url' => ['point/view'],
                             ],
-                            [
+                          /*  [
                                 'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Add event</span>',
                                 'url' => ['site/event_add'],
                             ],
-
+                            [
+                                'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Create point</span>',
+                                'url' => ['point/index'],
+                            ],*/
                             /*[
                                 'label' => '<span class="glyphicon glyphicon-upload" aria-hidden="true"></span><span>Images upload</span>',
                                 'url' => ['site/images'],

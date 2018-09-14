@@ -183,6 +183,15 @@ $(function () {
             let pointId = $(this).data('point');
             let userToken = $(this).data('token');
             let pointType = $(this).data('type');
+            if( !userToken ){
+               throw new Error('User token not found!');
+            }
+            if( !pointType ){
+                throw new Error('Type point not found!');
+            }
+            if( !pointId ){
+                throw new Error('ID point not found!');
+            }
 
             $.ajax({
                 url: '/point/view-item/',

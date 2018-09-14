@@ -85,10 +85,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             </div>
 
                             <div class="btn-group">
-                                <a href="/point/index?id=<?=$user_item['id']?>" type="button" class="btn  btn-sm btn-success" aria-label="Left Align"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Add event</span></a>
+                                <a href="/point/profile?id=<?=$user_item['id']?>" type="button" data-pjax="0" class="btn  btn-sm btn-success" aria-label="Left Align"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Add geo profile</span></a>
                             </div>
                             <div class="btn-group">
-                                <a href="/event/list/<?=$user_item['id']?>" type="button" class="btn  btn-sm btn-info" aria-label="Left Align"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">User events</span></a>
+                                <a href="/point/view?id=<?=$user_item['id']?>" type="button" data-pjax="0" class="btn  btn-sm btn-info" aria-label="Left Align"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> <span class="hidden-xs hidden-sm">Geo profiles</span></a>
                             </div>
 
                         </td>
