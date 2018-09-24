@@ -136,7 +136,9 @@ if( isset($_GET['id']) ){
                             'array_point_by_type' => $array_point_by_type,
                             'token' => $user_data['token'],
                         ]) ?>
-                    <?php } ?>
+                    <?php }else{
+                        echo 'NO geo points!';
+                    } ?>
 
                 </div>
 

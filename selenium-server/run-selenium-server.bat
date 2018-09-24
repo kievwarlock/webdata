@@ -1,0 +1,1 @@
+java -jar C:\Sergey\OpenServer\OSPanel\domains\webdata-v2\selenium-server\selenium-server-standalone-2.47.1.jar -Dwebdriver.chrome.driver=C:\Sergey\OpenServer\OSPanel\domains\webdata-v2\selenium-server\chromedriver.exe
