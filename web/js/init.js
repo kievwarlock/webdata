@@ -63,7 +63,7 @@ $(function () {
                         $('#edit-user-profile').modal('show');
                         addPushNotification('success', 'Profile was loaded!', 3000 );
                     }else{
-                        addPushNotification('error', 'Error, try again!', 3000 );
+                        addPushNotification('error', 'Error, try again! ', 3000 );
                     }
 
                 },

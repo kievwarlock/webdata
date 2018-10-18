@@ -122,6 +122,7 @@ class UserController extends MainController
                 // If user account did not confirmed with sms code  - then confirm it with create profile
                 if( strstr($data['user_token'], 'null') ){
                     $updateUser = $UserDataModel->addNewUser($data['user_phone']);
+
                     if( $updateUser ){
                         $data['user_token'] = $updateUser["token"];
                     }

@@ -24,8 +24,8 @@ class PointDataModel extends  ServerModel {
             case 'PROFILE':
 
                 if(
-                    isset( $data['lat'] ) and !empty( $data['lng'] ) and
-                    isset( $data['lat'] ) and !empty( $data['lng'] ) and
+                    isset( $data['lat'] ) and !empty( $data['lat'] ) and
+                    isset( $data['lng'] ) and !empty( $data['lng'] ) and
                     isset( $data['lastVisit'] ) and !empty( $data['lastVisit'] )
                 ){
 

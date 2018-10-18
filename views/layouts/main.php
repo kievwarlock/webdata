@@ -121,6 +121,14 @@ if( $this->context->module->requestedRoute ==  'point/index' ){
                                 'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Geo points</span>',
                                 'url' => ['point/view'],
                             ],
+                            [
+                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Import</span>',
+                                'url' => ['import/index'],
+                            ],
+                            [
+                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Generate</span>',
+                                'url' => ['import/generate'],
+                            ],
                           /*  [
                                 'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Add event</span>',
                                 'url' => ['site/event_add'],

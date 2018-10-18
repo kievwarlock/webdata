@@ -68,19 +68,21 @@ class UserDataModel extends  ServerModel {
 
     public function addNewUser( $oldPhoneNumber = false ){
 
-        $usersArray = $this->getUsersArray();
+        $new_phone_number = false;
+        if( !$oldPhoneNumber ) {
+            $usersArray = $this->getUsersArray();
 
+            if( !is_array($usersArray) and $usersArray['status'] === false ) return false;
 
-        if( !is_array($usersArray) and $usersArray['status'] === false ) return false;
+            $new_phone_number =  $this->generatePhoneNumber( count($usersArray['data']) );
 
-        $new_phone_number =  $this->generatePhoneNumber( count($usersArray['data']) );
-
-
+        }
 
 
         if( $oldPhoneNumber ){
             $new_phone_number = $oldPhoneNumber;
         }
+
         if( $new_phone_number ){
             $sms_code = $this->getSmsCode($new_phone_number);
 

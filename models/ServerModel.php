@@ -2,7 +2,7 @@
 namespace app\models;
 
 
-
+use yii;
 use yii\web\BadRequestHttpException;
 
 class ServerModel  {
@@ -58,6 +58,8 @@ class ServerModel  {
             $CURLOPT_HTTPHEADER_ARRAY[] = "X-Auth-Token:" . $token;
         }
 
+        Yii::debug('ENDPOINT: ' . $SERVER_ADRESS . $END_POINT);
+        
         $CURLOPT_ARRAY = array(
             CURLOPT_URL => $SERVER_ADRESS . $END_POINT ,
             CURLOPT_RETURNTRANSFER => true,
@@ -87,10 +89,12 @@ class ServerModel  {
         if ( $return['http_code'] == 200 ) {
             $return['status'] = true;
             $return['data'] = $response;
+            Yii::debug('DEBUG Response: ' . $response);
         }else{
             $return['status'] = false;
             $return['error'] = 'Res:'. $response . ' | ' . $error . ' | CODE: ' . $return['http_code'];
-            throw new BadRequestHttpException( 'REQUEST ERROR: ' . $return['error'] );
+            Yii::error('REQUEST ERROR: ' . $return['error']);
+            //throw new BadRequestHttpException( 'REQUEST ERROR: ' . $return['error'] );
         }
 
         return $return;

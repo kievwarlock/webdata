@@ -56,6 +56,8 @@ class AppAsset extends AssetBundle
         'https://npmcdn.com/@turf/turf/turf.min.js',
         'js/map-init.js',
 
+
+        'js/import/import.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',

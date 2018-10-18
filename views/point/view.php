@@ -175,8 +175,8 @@ if( isset($_GET['id']) ){
         </thead>
         <tbody>
         <?php
-
-        if( isset($points)  ){ ?>
+        $points = false;
+        if( isset($points) and is_array($points) ){ ?>
 
 
             <?php
