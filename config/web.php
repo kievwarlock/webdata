@@ -54,6 +54,7 @@ $config = [
                 'event/add/<id:\d+>' => 'site/event_add',
                 'event/list/<id:\d+>' => 'site/event_list',
                 'event/list/' => 'site/event_list',
+                'api/get-users/<count:\d+>' => 'api/get-users',
                 '<action>'=>'site/<action>',
             ],
             /*'rules' => [
