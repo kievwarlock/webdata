@@ -5,6 +5,7 @@ namespace app\controllers;
 
 use app\models\UserDataModel;
 use yii\base\ErrorException;
+use yii\web\Response;
 
 
 class ApiController extends MainController
@@ -12,16 +13,31 @@ class ApiController extends MainController
     /**
      * {@inheritdoc}
      */
+    public $enableCsrfValidation = false;
     private $auth_token = '3bad8293-cb72-454f-a52c-9f9aa3d2e3cc';
     private $max_count_users = 20;
     private $min_count_users = 1;
+
 
     public function behaviors()
     {
         return [
 
+            // For cross-domain AJAX request
+            'corsFilter'  => [
+                'class' => \yii\filters\Cors::className(),
+                'cors'  => [
+                    // restrict access to domains:
+                    'Origin'                           => ['*'],
+                    'Access-Control-Request-Method'    => ['GET'],
+                    'Access-Control-Allow-Credentials' => true,
+                    'Access-Control-Max-Age'           => 3600,                 // Cache (seconds)
+                ],
+            ],
+
         ];
     }
+
 
 
 
@@ -92,9 +108,10 @@ class ApiController extends MainController
             ];
         }
 
-        $json_data = json_encode( $return_array_data );
 
-        return $json_data;
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        return $return_array_data;
 
 
     }
