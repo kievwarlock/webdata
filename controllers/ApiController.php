@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 
+use app\models\PointDataModel;
 use app\models\UserDataModel;
-use yii\base\ErrorException;
 use yii\web\Response;
 
 
@@ -21,21 +21,40 @@ class ApiController extends MainController
 
     public function behaviors()
     {
-        return [
 
-            // For cross-domain AJAX request
-            'corsFilter'  => [
-                'class' => \yii\filters\Cors::className(),
-                'cors'  => [
-                    // restrict access to domains:
-                    'Origin'                           => ['*'],
-                    'Access-Control-Request-Method'    => ['GET'],
-                    'Access-Control-Allow-Credentials' => true,
-                    'Access-Control-Max-Age'           => 3600,                 // Cache (seconds)
-                ],
+        $behaviors = parent::behaviors();
+
+        // add CORS filter
+        $behaviors['corsFilter'] = [
+            'class' =>  \yii\filters\Cors::className(),
+            'cors' => [
+                'Origin' => ['*'],
+                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                'Access-Control-Request-Headers' => ['*'],
+
+                'Access-Control-Allow-Credentials' => true,
             ],
 
         ];
+
+       /* var_dump($behaviors['authenticator']);
+        unset($behaviors['authenticator']);
+        $behaviors['authenticator'] = [
+            'class' =>  HttpBearerAuth::className(),
+        ];*/
+
+       /* $behaviors['access'] = [
+            'class' => AccessControl::className(),
+            'rules' => [
+                [
+                    'allow' => true,
+                    'roles' => ['@'],
+                ],
+            ],
+        ];*/
+
+        return $behaviors;
+
     }
 
 
@@ -117,6 +136,71 @@ class ApiController extends MainController
     }
 
 
+
+
+    public function actionGetPoints( $count = 10 )
+    {
+        $return_array_data = [
+            'status' => false,
+            'data' => '',
+            'error' => ''
+        ];
+
+
+        if( is_numeric( $count ) ){
+
+
+            if( \Yii::$app->request->isGet ){
+
+                $headers = apache_request_headers();
+
+                if( isset($headers['Authorization']) and $headers['Authorization'] == $this->auth_token ){
+
+                    $pointModel = new PointDataModel();
+                    $allGeoPoints = $pointModel->getPoints();
+
+                    $return_geo_points = array();
+
+                    if( $allGeoPoints['status'] === true ){
+
+                        $return_geo_points = array_slice( $allGeoPoints['data'], 0 , $count);
+
+
+                        if( is_array($return_geo_points) and count($return_geo_points) > 0 ){
+                            $return_array_data['status'] = $allGeoPoints['status'];
+                            $return_array_data['data'] = $return_geo_points ;
+                        }else{
+                            $return_array_data['status'] = false;
+                            $return_array_data['error'] = 'Data is empty';
+                        }
+
+                    }else{
+
+                        $return_array_data['status'] = $allGeoPoints['status'] ;
+                        $return_array_data['error'] =  $allGeoPoints['error'];
+
+                    }
+
+                }else{
+                    $return_array_data['error'] = 'Authorization token error';
+                }
+
+            }
+
+        }else{
+            $return_array_data = [
+                'status' => false,
+                'error' => 'Count of users range from ' . $this->min_count_users . ' to ' . $this->max_count_users,
+            ];
+        }
+
+
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        return $return_array_data;
+
+
+    }
 
 
 }
