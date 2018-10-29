@@ -203,4 +203,68 @@ class ApiController extends MainController
     }
 
 
+
+    public function actionGetToken( )
+    {
+        $return_array_data = [
+            'status' => false,
+            'data' => '',
+            'error' => ''
+        ];
+
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+
+        if( \Yii::$app->request->isPost ){
+
+            $headers = apache_request_headers();
+
+            if( isset($headers['Authorization']) and $headers['Authorization'] == $this->auth_token ){
+
+
+                $data = \Yii::$app->request->post();
+
+
+                if( !isset($data['phoneNumber']) or empty($data['phoneNumber']) ){
+
+                    $return_array_data['status'] = false;
+                    $return_array_data['error'] = 'phoneNumber not found';
+
+                    return $return_array_data;
+                }
+                if( !isset($data['activationCode']) or empty($data['activationCode']) ){
+
+                    $return_array_data['status'] = false;
+                    $return_array_data['error'] = 'activationCode not found';
+
+                    return $return_array_data;
+                }
+
+
+                $userModel = new UserDataModel();
+                $token = $userModel->getUserToken($data['phoneNumber'], $data['activationCode']);
+
+               if( $token !== false ){
+                    $return_array_data['status'] = true;
+                    $return_array_data['data'] = $token ;
+
+                }else{
+                    $return_array_data['status'] = false ;
+                    $return_array_data['error'] =  'some error! no token';
+                }
+
+            }else{
+                $return_array_data['error'] = 'Authorization token error';
+            }
+
+        }
+
+
+        return $return_array_data;
+
+
+    }
+
+
+
 }
