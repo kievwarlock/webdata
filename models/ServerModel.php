@@ -9,9 +9,9 @@ class ServerModel  {
 
     protected $SECURITY_USER_NAME = 'admin';
     protected $SECURITY_USER_PASSWORD = '8C87cDm78ps9mTCE';
-    protected $SERVER_PROTECTED_ADRESS = 'http://stage.gether.work:8012'; //'http://159.69.82.236:8012';
+    protected $SERVER_PROTECTED_ADRESS = 'http://stage-old.gether.work:8012'; //'http://159.69.82.236:8012'; 'http://stage.gether.work:8012';
 
-    protected $SERVER_PUBLIC_ADRESS = 'http://stage.gether.work:8010'; //'http://159.69.82.236:8010';
+    protected $SERVER_PUBLIC_ADRESS = 'http://stage-old.gether.work:8010'; //'http://159.69.82.236:8010';
 
     //protected $SERVER_PUBLIC_ADRESS = 'http://dev-erica.gether.work:8010';
 
