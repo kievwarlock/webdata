@@ -81,6 +81,7 @@ class UserController extends MainController
 
             $newUser = $userDataModel->addNewUser();
 
+            return var_dump($newUser);
             $usersArray = $userDataModel->getUsersArray();
 
 

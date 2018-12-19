@@ -9,9 +9,11 @@ use yii\base\ErrorException;
 
 class UserDataModel extends  ServerModel {
 
-    private $path_auth_sms = '/auth/activation-code/';
+    private $path_auth_code = '/auth/activation-code/';
+    private $path_auth_login = '/auth/login/';
+    private $path_auth_register = '/auth/register';
     private $path_auth_token = '/auth/token/';
-    private $number_format =  '380930000002';
+    private $number_format =  '380930000001';
 
 
     public function getUsersArray(){
@@ -44,15 +46,20 @@ class UserDataModel extends  ServerModel {
         if( !$number){
             return false;
         }
-
+        $data = array(
+            'phoneNumber' => '380930000003',
+        );
+        $data = json_encode($data);
 
         $return_data = $this->curlRequest(
             $this->SERVER_PUBLIC_ADRESS,
-            $this->path_auth_sms,
+            $this->path_auth_code,
             '',
             'POST',
-            $number
+            $data
         );
+
+        return $return_data;
 
         if( is_array($return_data) and $return_data['status'] === true ){
             $response_data = json_decode($return_data['data'], true );
@@ -86,6 +93,7 @@ class UserDataModel extends  ServerModel {
         if( $new_phone_number ){
             $sms_code = $this->getSmsCode($new_phone_number);
 
+            return $sms_code;
 
             if( $sms_code ){
 
