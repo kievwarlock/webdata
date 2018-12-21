@@ -65,6 +65,8 @@ class PointController extends MainController
             ){
 
                 $pointModel = new PointDataModel();
+
+
                 $pointData = $pointModel->getPointById( $data['point_id'], $data['owner_user_token'], str_replace('_','-',$data['point_type']) );
 
                 if( $pointData["status"] === true ){
@@ -120,11 +122,10 @@ class PointController extends MainController
     {
 
         $pointModel = new PointDataModel();
-        $allGeoPoints = $pointModel->getPoints();
+        //$allGeoPoints = $pointModel->getPoints();
 
         $userDataModel = new UserDataModel();
         $usersArray = $userDataModel->getUsersArray();
-
 
 
 
@@ -296,7 +297,7 @@ class PointController extends MainController
             if( isset($data['type']) and !empty($data['type']) and isset($data['token']) and !empty($data['token'])  ){
 
                 $model = new PointDataModel();
-                $createPoint = $model->createPoint( $data, $data['token'] );
+                $createPoint = $model->createBase( $data, $data['token'] );
 
                 if(  $createPoint ){
                     return $createPoint;

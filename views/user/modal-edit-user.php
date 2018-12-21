@@ -18,6 +18,10 @@ $local_lang = [
     'it' => 'IT',
     'ru' => 'RU',
 ];
+
+if( is_array( $locale_list ) ){
+    $local_lang = array_combine( $locale_list, $locale_list);
+}
 $visible_status = [
     '1' => 'Visible',
     '0' => 'Hidden',

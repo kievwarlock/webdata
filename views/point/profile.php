@@ -150,10 +150,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             <label for="lng">Lng:</label>
                             <input type="text" name="lng" class="form-control map-lng"  placeholder="lng" readonly />
                         </div>
-                        <div class="form-group form-item-block form-item-block-last-visit" style="display: block;">
+                        <!--<div class="form-group form-item-block form-item-block-last-visit" style="display: block;">
                             <label for="last-visit">Последнее посещение:</label>
                             <input type="text" id="last-visit" name="last-visit"  class="time-ui form-control" placeholder="Время">
-                        </div>
+                        </div>-->
                         <div class="form-group form-item-block form-item-block-submit" style="display: block;">
                             <button type="button" class="btn btn-success create-geo-profile"> Create profile</button>
                             <p class="save-image-input-loader">

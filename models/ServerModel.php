@@ -91,7 +91,12 @@ class ServerModel  {
             $return['data'] = $response;
             Yii::debug('DEBUG Response: ' . $response);
         }else{
+            var_dump($SERVER_ADRESS);
+            var_dump($END_POINT);
+           var_dump($data);
+            var_dump($response);
             $return['status'] = false;
+            $return['data'] = $response;
             $return['error'] = 'Res:'. $response . ' | ' . $error . ' | CODE: ' . $return['http_code'];
             Yii::error('REQUEST ERROR: ' . $return['error']);
             //throw new BadRequestHttpException( 'REQUEST ERROR: ' . $return['error'] );

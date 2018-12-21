@@ -81,14 +81,13 @@ class UserController extends MainController
 
             $newUser = $userDataModel->addNewUser();
 
-            return var_dump($newUser);
             $usersArray = $userDataModel->getUsersArray();
-
 
             if( $usersArray['status'] === true ){
                 return $this->renderAjax('index',[
                     'users' => $usersArray['data'],
-                    'new_user' => $newUser
+                    'new_user' => $newUser,
+
                 ]);
             }else{
                 return $this->renderAjax('index',[
@@ -112,6 +111,8 @@ class UserController extends MainController
 
             $data = Yii::$app->request->post();
 
+
+
             if( isset( $data['user_id'] ) and !empty( $data['user_id'] )   and
                 isset( $data['user_token'] ) and !empty( $data['user_token'] ) and
                 isset( $data['user_phone'] ) and !empty( $data['user_phone'] )
@@ -119,9 +120,14 @@ class UserController extends MainController
 
                 $UserDataModel = new UserDataModel();
 
+                $locale_list = $UserDataModel->getLocaleList();
 
                 // If user account did not confirmed with sms code  - then confirm it with create profile
                 if( strstr($data['user_token'], 'null') ){
+
+
+
+
                     $updateUser = $UserDataModel->addNewUser($data['user_phone']);
 
                     if( $updateUser ){
@@ -150,7 +156,8 @@ class UserController extends MainController
                     return $this->renderAjax('modal-edit-user',[
                         'full_user_data' => $user_data['data'],
                         'token' => $data['user_token'],
-                        'avatar' => $avatar_base64
+                        'avatar' => $avatar_base64,
+                        'locale_list' => $locale_list
                     ]);
                 }else{
                     return 'ERROR!' . $user_data['error'];
@@ -171,6 +178,7 @@ class UserController extends MainController
 
         if (Yii::$app->request->isAjax) {
             $data = Yii::$app->request->post();
+
 
 
             $return_response = false;

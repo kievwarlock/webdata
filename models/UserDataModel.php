@@ -1,4 +1,5 @@
 <?php
+
 namespace app\models;
 
 use Yii;
@@ -7,20 +8,22 @@ use app\models\Datausers;
 use yii\base\ErrorException;
 
 
-class UserDataModel extends  ServerModel {
+class UserDataModel extends ServerModel
+{
 
     private $path_auth_code = '/auth/activation-code/';
     private $path_auth_login = '/auth/login/';
-    private $path_auth_register = '/auth/register';
+    private $path_auth_register = '/auth/register/';
     private $path_auth_token = '/auth/token/';
-    private $number_format =  '380930000001';
+    private $number_format = '380930000001';
 
 
-    public function getUsersArray(){
+    public function getUsersArray()
+    {
 
-        $return_data = $this->curlRequest( $this->SERVER_PROTECTED_ADRESS,"/person-auth-details" );
+        $return_data = $this->curlRequest($this->SERVER_PROTECTED_ADRESS, "/person-auth-details");
 
-        if( is_array($return_data) and $return_data['status'] === true ){
+        if (is_array($return_data) and $return_data['status'] === true) {
             $return_data['data'] = json_decode($return_data['data'], TRUE);
         }
 
@@ -29,25 +32,27 @@ class UserDataModel extends  ServerModel {
 
     }
 
-    public function generatePhoneNumber ($users_count  = 0) {
+    public function generatePhoneNumber($users_count = 0)
+    {
 
 
-        if( $users_count ){
+        if ($users_count) {
             $return_number = $this->number_format + $users_count;
-        }else{
+        } else {
             $return_number = $this->number_format;
         }
         return $return_number;
 
     }
 
-    public function getSmsCode( $number ) {
+    public function getSmsCode($number)
+    {
 
-        if( !$number){
+        if (!$number) {
             return false;
         }
         $data = array(
-            'phoneNumber' => '380930000003',
+            'phoneNumber' => $number,
         );
         $data = json_encode($data);
 
@@ -59,56 +64,49 @@ class UserDataModel extends  ServerModel {
             $data
         );
 
-        return $return_data;
 
-        if( is_array($return_data) and $return_data['status'] === true ){
-            $response_data = json_decode($return_data['data'], true );
-            if( isset( $response_data["activationCode"] ) and !empty( $response_data["activationCode"] ) ) {
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $response_data = json_decode($return_data['data'], true);
+            if (isset($response_data["activationCode"]) and !empty($response_data["activationCode"])) {
                 return $response_data["activationCode"];
             }
         }
         return false;
 
 
-
     }
 
-    public function addNewUser( $oldPhoneNumber = false ){
+    public function addNewUser($oldPhoneNumber = false)
+    {
 
         $new_phone_number = false;
-        if( !$oldPhoneNumber ) {
+        if (!$oldPhoneNumber) {
             $usersArray = $this->getUsersArray();
 
-            if( !is_array($usersArray) and $usersArray['status'] === false ) return false;
+            if (!is_array($usersArray) and $usersArray['status'] === false) return false;
 
-            $new_phone_number =  $this->generatePhoneNumber( count($usersArray['data']) );
+            $new_phone_number = $this->generatePhoneNumber(count($usersArray['data']));
 
         }
 
 
-        if( $oldPhoneNumber ){
+        if ($oldPhoneNumber) {
             $new_phone_number = $oldPhoneNumber;
         }
 
-        if( $new_phone_number ){
+        if ($new_phone_number) {
             $sms_code = $this->getSmsCode($new_phone_number);
 
-            return $sms_code;
 
-            if( $sms_code ){
+            if ($sms_code) {
 
-                $token = $this->getUserToken($new_phone_number, $sms_code );
+                $token = $this->userRegistration($new_phone_number, $sms_code);
 
-
-                if( $token ){
-
-                    $profile_id =  $this->createUserProfile($token);
-
-                    if( isset( $profile_id ) and !empty($profile_id) ){
-                        $profile_id['token'] = $token;
-                        return $profile_id;
-                    }
-
+                if ($token) {
+                    $token_array = explode(':', $token);
+                    $user_data['id'] = $token_array[0];
+                    $user_data['token'] = $token;
+                    return $user_data;
                 }
 
             }
@@ -116,8 +114,91 @@ class UserDataModel extends  ServerModel {
 
         return false;
     }
-    
-    public function getUserToken( $number, $code ) {
+
+
+    public function userLogin($number, $code)
+    {
+
+        if (!$number and !$code) {
+            return false;
+        }
+
+        $data = array(
+            'phoneNumber' => $number,
+            'activationCode' => $code,
+        );
+        $data = json_encode($data);
+
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            $this->path_auth_login,
+            '',
+            'POST',
+            $data
+        );
+
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $response_data = json_decode($return_data['data'], true);
+            if (isset($response_data["authToken"]) and !empty($response_data["authToken"])) {
+                return $response_data["authToken"];
+            }
+        }
+        return false;
+
+    }
+
+    public function getLocaleList(){
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            '/locale',
+            '',
+            'GET'
+        );
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $response_data = json_decode($return_data['data'], true);
+            return $response_data;
+        }
+        return false;
+    }
+
+    public function userRegistration($number, $code) {
+
+        if (!$number and !$code) {
+            return false;
+        }
+
+        $locale = $this->getLocaleList();
+
+        $data = array(
+            'phoneNumber' => $number,
+            'activationCode' => $code,
+            'city' => 'Kiev',
+            'fullName' => 'Test',
+            'locale' => $locale[0]
+        );
+
+
+        $data = json_encode($data);
+
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            $this->path_auth_register,
+            '',
+            'POST',
+            $data
+        );
+
+
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $response_data = json_decode($return_data['data'], true);
+            if (isset($response_data["authToken"]) and !empty($response_data["authToken"])) {
+                return $response_data["authToken"];
+            }
+        }
+        return false;
+    }
+
+    /*public function getUserToken( $number, $code ) {
 
         if( !$number and !$code){
             return false;
@@ -145,13 +226,13 @@ class UserDataModel extends  ServerModel {
         }
         return false;
 
-
     }
-    
-    public function updateUserProfile( $token, $data ){
+    */
+    public function updateUserProfile($token, $data)
+    {
 
 
-        if( !$token and !$data ){
+        if (!$token and !$data) {
             return false;
         }
 
@@ -161,12 +242,12 @@ class UserDataModel extends  ServerModel {
             $this->SERVER_PUBLIC_ADRESS,
             "/profile/",
             $token,
-            'POST',
+            'PUT',
             $new_data
         );
 
-        if( is_array($return_data) and $return_data['status'] === true ){
-            $return_data['data'] = json_decode( $return_data['data'], TRUE );
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $return_data['data'] = json_decode($return_data['data'], TRUE);
             return $return_data;
         }
 
@@ -175,10 +256,11 @@ class UserDataModel extends  ServerModel {
 
     }
 
-    public function createUserProfile( $token ){
+    public function createUserProfile($token)
+    {
 
         // RETURN PROFILE ID
-        if( !$token ){
+        if (!$token) {
             return false;
         }
 
@@ -198,8 +280,8 @@ class UserDataModel extends  ServerModel {
             $data
         );
 
-        if( is_array($return_data) and $return_data['status'] === true ){
-            return  json_decode( $return_data['data'], TRUE );
+        if (is_array($return_data) and $return_data['status'] === true) {
+            return json_decode($return_data['data'], TRUE);
         }
 
         return false;
@@ -207,9 +289,10 @@ class UserDataModel extends  ServerModel {
     }
 
 
-    public function getUserProfile($id, $token) {
+    public function getUserProfile($id, $token)
+    {
 
-        if( !$id and !$token){
+        if (!$id and !$token) {
             return false;
         }
 
@@ -219,20 +302,19 @@ class UserDataModel extends  ServerModel {
             $token
         );
 
-        if( is_array($return_data) and $return_data['status'] === true ){
-             $return_data['data'] = json_decode( $return_data['data'], TRUE );
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $return_data['data'] = json_decode($return_data['data'], TRUE);
         }
 
         // 404 - not found profile . And if 404 - try created profile
-        if( $return_data['http_code'] == 404  ){
-            $profile_id =  $this->createUserProfile($token);
-            if( $profile_id ){
-                return $this->getUserProfile($profile_id['id'],$token );
+        if ($return_data['http_code'] == 404) {
+            $profile_id = $this->createUserProfile($token);
+            if ($profile_id) {
+                return $this->getUserProfile($profile_id['id'], $token);
             }
         }
 
         return $return_data;
-
 
 
     }

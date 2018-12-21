@@ -219,7 +219,7 @@ function validationForm( type ){
     let lng = $('.form-item-block-map input[name="lng"]').val();
     //let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').val() + ' GMT');
 
-    let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').datetimepicker('getDate') );
+    //let lastVisit = Date.parse( $('.form-item-block-last-visit input[name="last-visit"]').datetimepicker('getDate') );
 
 
 
@@ -263,13 +263,13 @@ function validationForm( type ){
                 validResult.formData.lng= lng;
             }
 
-            if( lastVisit.length == 0 || isNaN(lastVisit) === true ){
+            /*if( lastVisit.length == 0 || isNaN(lastVisit) === true ){
                 validResult.valid = false;
                 validResult.empty.push('lastVisit');
                 validResult.error_message += "<li>last visit is empty!</li>";
             }else{
                 validResult.formData.lastVisit= lastVisit;
-            }
+            }*/
 
 
             break;
@@ -448,7 +448,7 @@ function createEvent( userToken, type, formData ){
 
                         let jsonEvent = JSON.parse(res);
                         if( jsonEvent.id ){
-                            addPushNotification('success', 'New geo point was created successful!' );
+                            addPushNotification('success', 'New Base was created successful!' );
                             clearFormData();
                         }else{
                             throw new SyntaxError("Ошибка в данных json");
