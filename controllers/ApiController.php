@@ -93,6 +93,7 @@ class ApiController extends MainController
                                     'phoneNumber'   => $user_item['phoneNumber'],
                                     'fullName'      => $user_data['data']['fullName'],
                                     'city'          => $user_data['data']['city'],
+                                    'avatarId'      => $user_data['data']['avatarId'],
                                 ];
                             }
 
