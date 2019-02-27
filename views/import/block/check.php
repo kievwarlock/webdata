@@ -4,8 +4,10 @@
 
 
 $error_count = 0;
-?>
 
+
+
+?>
 
 
 <?php if( is_array( $data_array )){ ?>
@@ -64,17 +66,29 @@ $error_count = 0;
                             <?php
 
                             switch($header_key){
+                                case 'profile_coordinates':
+
+                                    $profile_coordinates_json = htmlspecialchars( json_encode($data[$header_key]['data']), ENT_QUOTES, 'UTF-8');
+                                    ?>
+
+                                    <div class='import-data-item' data-name='<?=$header_key?>'  data-value='<?=$profile_coordinates_json?>'  ></div>
+
+                                    <?php
+
+                                    foreach ( $data[$header_key]['data'] as $profile_coordinates_key => $profile_coordinates_value ) {
+                                        echo  $profile_coordinates_key . ' : ' . $profile_coordinates_value . '<br>';
+                                    }
+                                    break;
                                 case 'base':
 
                                     $base_data_json =  htmlspecialchars( json_encode($data[$header_key]['data']), ENT_QUOTES, 'UTF-8');
                                     ?>
 
-                                    <div class='import-data-item' data-name='<?=$header_key?>'  data-value='<?=$base_data_json?>'  ></div>
+                                    <div class='import-data-item' data-name='<?=$header_key?>'  data-value='<?=json_encode($data[$header_key]['data'])?>'  ></div>
 
                                     <?php
                                     foreach ( $data[$header_key]['data'] as $bases ) {
                                         foreach ($bases as $base_pror => $base_val) {
-
                                             echo  $base_pror . ' : ' . $base_val . '<br>';
                                         }
                                         echo '</hr>';

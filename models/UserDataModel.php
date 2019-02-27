@@ -76,7 +76,7 @@ class UserDataModel extends ServerModel
 
     }
 
-    public function addNewUser($oldPhoneNumber = false)
+    public function addNewUser($oldPhoneNumber = false , $data = false)
     {
 
         $new_phone_number = false;
@@ -100,7 +100,7 @@ class UserDataModel extends ServerModel
 
             if ($sms_code) {
 
-                $token = $this->userRegistration($new_phone_number, $sms_code);
+                $token = $this->userRegistration($new_phone_number, $sms_code, $data);
 
                 if ($token) {
                     $token_array = explode(':', $token);
@@ -161,7 +161,7 @@ class UserDataModel extends ServerModel
         return false;
     }
 
-    public function userRegistration($number, $code) {
+    public function userRegistration($number, $code , $data) {
 
         if (!$number and !$code) {
             return false;
@@ -169,16 +169,22 @@ class UserDataModel extends ServerModel
 
         $locale = $this->getLocaleList();
 
-        $data = array(
-            'phoneNumber' => $number,
-            'activationCode' => $code,
-            'city' => 'Kiev',
-            'fullName' => 'Test',
-            'locale' => $locale[0]
-        );
+        if( !$data ){
+            $data = array(
+                'phoneNumber' => $number,
+                'activationCode' => $code,
+                'city' => 'Kiev',
+                'fullName' => 'Test',
+                'locale' => $locale[0]
+            );
+        }else{
+            $data['phoneNumber'] = $number;
+            $data['activationCode'] = $code;
+        }
 
 
         $data = json_encode($data);
+
 
         $return_data = $this->curlRequest(
             $this->SERVER_PUBLIC_ADRESS,
@@ -228,6 +234,68 @@ class UserDataModel extends ServerModel
 
     }
     */
+
+    public function updateProfileCoordinates($token,$lat, $lon )
+    {
+
+
+        if ( !$token and !$lat and !$lon) {
+            return false;
+        }
+        $data = [
+            'latitude' => $lat,
+            'longitude' => $lon,
+        ];
+        $profileCoordinates = json_encode($data);
+
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            "/profile/coordinates/",
+            $token,
+            'PUT',
+            $profileCoordinates
+        );
+
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $return_data['data'] = json_decode($return_data['data'], TRUE);
+            return $return_data;
+        }
+
+        return false;
+
+
+    }
+
+    public function updateProfileVisibility($token, $status )
+    {
+
+
+        if ( !$token and !is_bool($status) ) {
+            return false;
+        }
+        $data = [
+            'value' => $status,
+        ];
+        $statusData = json_encode($data);
+
+        $return_data = $this->curlRequest(
+            $this->SERVER_PUBLIC_ADRESS,
+            "/profile/visibility/",
+            $token,
+            'PUT',
+            $statusData
+        );
+
+        if (is_array($return_data) and $return_data['status'] === true) {
+            $return_data['data'] = json_decode($return_data['data'], TRUE);
+            return $return_data;
+        }
+
+        return false;
+
+
+    }
+
     public function updateUserProfile($token, $data)
     {
 
@@ -235,7 +303,7 @@ class UserDataModel extends ServerModel
         if (!$token and !$data) {
             return false;
         }
-
+        $data['topicIds'] = [];
         $new_data = json_encode($data);
 
         $return_data = $this->curlRequest(

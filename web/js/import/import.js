@@ -11,7 +11,8 @@ $(function () {
 
         if( importItems.length > 0 ){
 
-            startLoader();
+
+            //startLoader();
 
             importItems.each( function (e) {
 
@@ -24,6 +25,8 @@ $(function () {
 
                     if( dataKey == 'base' ){
                         formData.append(  dataKey, JSON.stringify(dataValue)  );
+                    }else if( dataKey == 'profile_coordinates' ) {
+                        formData.append(  dataKey, JSON.stringify(dataValue)  );
                     }else{
                         formData.append(  dataKey, dataValue );
                     }
@@ -31,7 +34,7 @@ $(function () {
                 });
 
 
-
+                console.log('formData:', formData);
 
                 try {
 
@@ -44,6 +47,8 @@ $(function () {
                         contentType: false,
                         success: function(res){
 
+                           /* console.log('RES:', res);
+                            return res;*/
                             counterImport++;
 
                             if( importItems.length == counterImport ){
@@ -75,6 +80,36 @@ $(function () {
                                         }
                                     }
 
+
+                                    if( data['profile_visibility'] ){
+                                        if ( data['profile_visibility'] == true) {
+
+                                            currentItem.find('.import-status').append('<p class="alert alert-success">profile visibility success</p>');
+                                            addPushNotification('success', 'Profile visibility updated successful!', 2300 );
+
+                                        } else {
+
+                                            currentItem.find('.import-status').append('<p class="alert alert-danger">profile visibility ERROR</p>');
+                                            addPushNotification('error', 'Profile visibility not updated! Error:' , 5000 );
+
+                                        }
+
+                                    }
+
+                                    if( data['profile_coordinates'] ){
+                                        if ( data['profile_coordinates'] == true) {
+
+                                            currentItem.find('.import-status').append('<p class="alert alert-success">Profile coordinates success</p>');
+                                            addPushNotification('success', 'Profile coordinates updated successful!', 2300 );
+
+                                        } else {
+
+                                            currentItem.find('.import-status').append('<p class="alert alert-danger">Profile coordinates ERROR</p>');
+                                            addPushNotification('error', 'Profile coordinates not updated! Error:' , 5000 );
+
+                                        }
+
+                                    }
                                     if( data['profile'] ){
                                         if ( data['profile'] == true) {
 

@@ -412,7 +412,56 @@ class Marker {
     }
 
 
+    pushMarkerImport( event = false , lat = false, lng = false  ){
 
+        if( event === false &&  ( lat === false || lng === false )  ){ return false }
+
+        let latMap =  parseFloat( ( lat !== false ? lat : event.lngLat.lat ) );
+        let lngMap =  parseFloat( ( lng !== false ? lng : event.lngLat.lng ) ) ;
+
+
+        let returnMarkerInfo = {
+            'coordinates': {
+                'lng': lngMap,
+                'lat':latMap,
+            },
+        };
+
+
+        let importId = document.querySelectorAll(".map-selection-import-data input").length;
+        let layerId = 'importMarker'+importId;
+
+        this.map.addSource( layerId , {
+            type: 'geojson',
+            data: {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            lngMap,
+                            latMap
+                        ]
+                    }
+                }]
+            }
+        });
+
+        this.map.addLayer({
+            "id":  layerId ,
+            "source": layerId,
+            "type": "circle",
+            "paint": {
+                "circle-radius": 5,
+                "circle-color": "#73d941"
+            }
+        });
+
+
+        return returnMarkerInfo;
+    }
 
 
     moveMarker( e, drag ) {
@@ -556,7 +605,10 @@ function initMap( lat, lng ){
 
             map.on('click', function (e) {
 
+
                 let currentCoordinates = initMarker.addMarker(e);
+
+
                 $('#geo-point-latitude').val(currentCoordinates.coordinates.lat);
                 $('#geo-point-longitude').val(currentCoordinates.coordinates.lng);
 
@@ -594,6 +646,18 @@ if( document.getElementById( MAP_CONTAINER ) ) {
 
             //initMarker.updateMarker();
             let currentCoordinates = initMarker.addMarker(e);
+
+            let importData = document.querySelector(".map-selection-import-data");
+            if( importData ){
+                let input = document.createElement("input");
+                input.type = "text";
+                input.name = "markersCoordinates[]";
+                input.value = currentCoordinates.coordinates.lat + ',' + currentCoordinates.coordinates.lng;
+                importData.appendChild(input);
+                initMarker.pushMarkerImport(e );
+            }
+
+
             $('.map-lat').val(currentCoordinates.coordinates.lat);
             $('.map-lng').val(currentCoordinates.coordinates.lng);
 

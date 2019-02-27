@@ -22,7 +22,8 @@ class PointDataModel extends  ServerModel {
 
             $new_data = array(
                 'latitude' =>  $data['lat'],
-                'longitude' =>  $data['lng']
+                'longitude' =>  $data['lng'],
+                'title' =>  ( $data['title'] )? $data['title'] : '',
             );
             $new_data = json_encode($new_data);
 
@@ -244,6 +245,7 @@ class PointDataModel extends  ServerModel {
         return false;
 
     }
+
 
 
 

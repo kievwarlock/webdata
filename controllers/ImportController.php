@@ -79,18 +79,108 @@ class ImportController extends MainController
             if( $data ){
 
 
+
                 $userDataModel = new UserDataModel();
 
-                $newUser = $userDataModel->addNewUser( $data['phone']  );
+                $data_profile = [
+                    'fullName'  =>  ( isset( $data['user_name'] ) ) ? $data['user_name'] : 'NO name' ,
+                    'city'      => ( isset( $data['city'] ) ) ? $data['city'] : 'NO city' ,
+                    'locale'    => ( isset( $data['locale'] ) ) ? $data['locale'] : 'ru' ,
+                    'visible'   =>  ( isset( $data['visible_status'] ) and  $data['visible_status'] == true  ) ? 'true' : 'false' ,
+                ];
+                //return var_dump( $data['profile_coordinates']);
+                $newUser = $userDataModel->addNewUser( $data['phone'], $data_profile  );
+
+                $coordinates = false;
+                if( is_array($newUser) ){
+                    $result_array['user'] = true;
+                    $result_array['profile'] = true;
 
 
+
+                    if( isset( $newUser['token'] ) ) {
+                        $profile_coordinates  = json_decode( $data['profile_coordinates'], true );
+
+                        if( $data['visible_status'] == true){
+                            $visibility = $userDataModel->updateProfileVisibility( $newUser['token'], true );
+                            if( $visibility ){
+                                $result_array['profile_visibility'] = $visibility['status'];
+                            }
+                        }
+
+
+                        $coordinates = $userDataModel->updateProfileCoordinates( $newUser['token'], $profile_coordinates['lat'], $profile_coordinates['lng'] );
+                        if( $coordinates ){
+                            $result_array['profile_coordinates'] = $coordinates['status'];
+                        }
+                        if( $data['base'] ){
+
+                            $data_bases  = json_decode($data['base'], true );
+                            $point = new PointDataModel();
+
+                            if( is_array( $data_bases ) ){
+
+                                foreach ($data_bases as $base_item ) {
+                                    $base_item_data = [
+                                        'lat' => $base_item['lat'],
+                                        'lng' => $base_item['lng'],
+                                        'title' => $base_item['title'],
+
+
+                                    ];
+
+                                    $new_base = $point->createBase( $base_item_data, $newUser['token'] );
+
+                                    if( isset($new_base) and $new_base != false  ){
+                                        $result_array['bases'][] = json_encode($new_base);
+                                    }
+
+
+                                }
+                            }
+
+                        }
+
+                        /* if( $data['base'] ){
+
+                             $data_bases  = json_decode($data['base'], true );
+                             $point = new PointDataModel();
+
+                             if( is_array( $data_bases ) ){
+
+                                 foreach ($data_bases as $base_item ) {
+                                     $base_item_data = [
+                                         'type' => 'PROFILE',
+                                         'lat' => $base_item['lat'],
+                                         'lng' => $base_item['lng'],
+                                         'lastVisit' => strtotime( $base_item['last_visit']),
+
+                                     ];
+
+                                     $new_base = $point->createPoint( $base_item_data, $newUser['token'] );
+
+                                     if( isset($new_base) and $new_base != false  ){
+                                         $result_array['bases'][] = json_encode($new_base);
+                                     }
+
+
+                                 }
+                             }
+
+                         }*/
+
+                    }
+                }
+                //return var_dump($coordinates);
+
+                //return var_dump($newUser);
                 if( is_array($newUser) ){
 
                     $result_array['user'] = true;
 
                     if( isset( $newUser['token'] ) ) {
 
-                        $data_update_profile = [
+                       /* $data_update_profile = [
                             'fullName'  =>  ( isset( $data['user_name'] ) ) ? $data['user_name'] : 'NO name' ,
                             'city'      => ( isset( $data['city'] ) ) ? $data['city'] : 'NO city' ,
                             'locale'    => ( isset( $data['locale'] ) ) ? $data['locale'] : 'ru' ,
@@ -124,7 +214,7 @@ class ImportController extends MainController
                                 }
                             }
 
-                        }
+                        }*/
 
                     }
                 }
@@ -201,6 +291,22 @@ class ImportController extends MainController
         ]);
 
 
+    }
+
+    public function actionGenerateMarkers() {
+
+        $data = false;
+        $dataMarkers = false;
+        if (Yii::$app->request->isPost) {
+
+            $data = Yii::$app->request->post();
+            $dataMarkers = $this->generateInit($data['markersCoordinates'], $data['markerSection']);
+        }
+        //$dataMarkers = $this->generateInit();
+        return $this->render('generate-markers',[
+            'data' => $data,
+            'markers' => $dataMarkers,
+        ]);
     }
 
 
@@ -281,6 +387,7 @@ class ImportController extends MainController
                 'city',
                 'visible_status',
                 'base',
+                'profile_coordinates',
             ];
 
             // visible_status  we need
@@ -293,17 +400,18 @@ class ImportController extends MainController
             $validation_base = [
                 'lat',
                 'lng',
-                'last_visit',
+                'title',
             ];
 
             // Locale  we need
             $validation_locale = [
-                'de',
-                'us',
-                'fr',
-                'es',
-                'it',
-                'ru',
+                'UKRAINIAN',
+                'GERMAN',
+                'ENGLISH',
+                'FRENCH',
+                'SPANISH',
+                'ITALIAN',
+                'RUSSIAN',
             ];
 
 
@@ -370,7 +478,15 @@ class ImportController extends MainController
                                 $data_xlsx_row[$key]['valid'] = true;
 
                                 break;
+                            case 'profile_coordinates':
 
+                                $profile_coordinates_decode = json_decode($xlsx_item[$key_head], true);
+                                if( is_array($profile_coordinates_decode) and !empty($profile_coordinates_decode['lat']) and  $profile_coordinates_decode['lng'] ){
+                                    $data_xlsx_row[$key]['valid'] = true;
+                                    $data_xlsx_row[$key]['data']  = $profile_coordinates_decode;
+                                }
+
+                                break;
                             case 'visible_status':
 
                                 if ( in_array($xlsx_item[$key_head], $validation_visible_status)) {
@@ -503,6 +619,7 @@ class ImportController extends MainController
             'offset' => 0,
         ];
 
+
         $address_array = array();
 
         $arguments = array_merge( $default_args, $args);
@@ -522,11 +639,18 @@ class ImportController extends MainController
             }else{
                 $request_url = $api_url;
             }
-            echo $request_url;
+
+            // https://api.foursquare.com/v2/venues/explore?client_id=YPEQBLY4CXWUXQYU3BPUOSG2VSRV0DEPNOH1VZFBX2XI4IDO&client_secret=14NPWVABOLT3TSXP4ZGFBNS50ER5ILO1SXY3O4OYE1HDSWPK&ll=50.60744894668227,30.270378721332662&radius=100000&v=20180323&limit=100&offset=0%C2%A7ion=food
+
+
             $geo_file = file_get_contents($request_url);
 
             if( $geo_file !== false and !is_null($geo_file) ){
                 $geo_file = json_decode($geo_file, true);
+
+                //echo $geo_file;
+                //return $geo_file;
+
                 if( $geo_file !== false ) {
                     if ($geo_file['meta']['code'] == 200 and count($geo_file['response']) > 0) {
 
@@ -534,9 +658,11 @@ class ImportController extends MainController
                         if (is_array($file_array)) {
 
                             foreach ($file_array as $item) {
+
                                 $val_address = $item['venue']['location']['lat'] . ',' . $item['venue']['location']['lng'];
                                 if( !in_array( $val_address, $address_array ) ){
-                                    $address_array[] =  $item['venue']['location']['lat'] . ',' . $item['venue']['location']['lng'];
+                                    $str = $item['venue']['location']['lat'] . ',' . $item['venue']['location']['lng'] . ',' . $item['venue']['name'];
+                                    $address_array[] =  mb_convert_encoding($str, "UTF-8", "auto"); ;
                                 }
                             }
 
@@ -553,8 +679,11 @@ class ImportController extends MainController
         return false;
     }
 
-    protected function generateInit(){
-        $kiev_near_points = array(
+    protected function generateInit($points, $sections){
+        if( !is_array($points) or !is_array($sections) ){
+            return false;
+        };
+        /*$kiev_near_points = array(
             '50.543506925300534,30.398525070236104',
             '50.55077743564644,30.47518404684348',
             '50.49986031825645,30.35962350002265',
@@ -587,12 +716,12 @@ class ImportController extends MainController
             'sights',
             'trending',
             'nextVenues'
-        );
+        );*/
         $array_address = array();
 
-        foreach ($kiev_near_points2 as $point ) {
+        foreach ($points as $point ) {
             foreach ($sections as $section) {
-                $array_address = array_merge($array_address, generateAddresses(
+                $array_address = array_merge($array_address, $this->generateAddresses(
                     [
                         'll' => $point,
                         'section' => $section,
@@ -607,8 +736,10 @@ class ImportController extends MainController
                 ]
         ) );
         }*/
+
         if( is_array($array_address) and count($array_address) > 0 ){
-            if( file_put_contents('gen-data/address-data.json', json_encode( $array_address )) ) {
+            //return $array_address;
+            if( file_put_contents('gen-data/address-2-data.json', utf8_encode(json_encode( $array_address )) ) ) {
                 return count($array_address);
             };
 
@@ -638,6 +769,7 @@ class ImportController extends MainController
             'city' => 3,
             'visible_status' => 4,
             'base' => 5,
+            'profile_coordinates' => 6,
         ];
 
 
@@ -646,7 +778,7 @@ class ImportController extends MainController
         $generate_array[] = array_flip($default_row);
 
 
-        $phone_mask = '381110000001';
+        $phone_mask = '38000000001';
         for( $i = 1; $i <= $count_users; $i++ ){
 
             $base_array = array();
@@ -656,22 +788,34 @@ class ImportController extends MainController
                 $base_array[] = json_encode([
                     'lat' => $base_random_item[0],
                     'lng' => $base_random_item[1],
-                    'last_visit' => "28.09.2018 3:00:00",
+                    'title' => $base_random_item[2],
                 ]);
 
             }
 
             $base_in_row = implode(';', $base_array);
 
+            $profile_coordinates_item = explode(',', $address_array[array_rand($address_array, 1)] );
+            $profile_coordinates = json_encode([
+                'lat' => $profile_coordinates_item[0],
+                'lng' => $profile_coordinates_item[1],
+            ]);
+
 
             $generate_array[] =  [
                 $default_row['phone'] => $phone_mask++,
                 $default_row['user_name'] =>  $names[array_rand($names, 1)] . ' ' .  $surnames[array_rand($surnames, 1)],
-                $default_row['locale'] => 'ru',
+                $default_row['locale'] => 'RUSSIAN',
                 $default_row['city'] => 'Kiev',
                 $default_row['visible_status'] => '1',
                 $default_row['base'] => $base_in_row,
+                $default_row['profile_coordinates'] => $profile_coordinates,
+
             ];
+
+            //var_dump($generate_array);
+
+
         }
 
         return $generate_array;

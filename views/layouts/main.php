@@ -129,6 +129,10 @@ if( $this->context->module->requestedRoute ==  'point/index' ){
                                 'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Generate</span>',
                                 'url' => ['import/generate'],
                             ],
+                            [
+                                'label' => '<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span><span>Gen Markers</span>',
+                                'url' => ['import/generate-markers'],
+                            ],
                           /*  [
                                 'label' => '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span>Add event</span>',
                                 'url' => ['site/event_add'],

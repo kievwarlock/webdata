@@ -15,6 +15,7 @@ class AvatarController extends Controller {
 
     public function actionCreate()
     {
+
         if (Yii::$app->request->isAjax and Yii::$app->request->post()) {
 
             $data = Yii::$app->request->post();
